@@ -1,7 +1,9 @@
 ﻿using DlibDotNet;
 using DlibDotNet.Extensions;
+using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using Windows.UI.ViewManagement.Core;
 
 namespace GazeInference_Console
 {
@@ -28,8 +30,7 @@ namespace GazeInference_Console
             ref float[] face_grid)
         {
             var rgb_array2d_img = BitmapToRgbPixel(rgb_bitmap);
-            var ycbcr_bitmap = RgbToYCbCr(ref rgb_bitmap);
-            var ycbcr_array2d_img = BitmapToRgbPixel(ycbcr_bitmap);
+            var ycbcr_array2d_img = RgbToYCbCr(rgb_array2d_img);
 
             Dlib.SaveJpeg(rgb_array2d_img, "face_rgb.jpg");
             Dlib.SaveJpeg(ycbcr_array2d_img, "face_ycbcr.jpg");
@@ -238,7 +239,7 @@ namespace GazeInference_Console
         }
 
         private static Array2D<RgbPixel> BitmapToRgbPixel(
-    Bitmap input_bitmap)
+            Bitmap input_bitmap)
         {
             Array2D<RgbPixel> array2d = null;
 
@@ -258,55 +259,40 @@ namespace GazeInference_Console
             return array2d;
         }
 
-        private static Bitmap RgbToYCbCr(
-            ref Bitmap rgb_bitmap)
+        private static Array2D<RgbPixel> RgbToYCbCr(
+            Array2D<RgbPixel> rgb_array)
         {
-            var width = rgb_bitmap.Width;
-            var height = rgb_bitmap.Height;
+            var ycbcr_array = new Array2D<RgbPixel>(rgb_array.Rows, rgb_array.Columns);
 
-            var result_bitmap = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            var width = rgb_array.Columns;
+            var height = rgb_array.Rows;
 
-            // This section is labeled as unsafe because it uses byte pointers
-            unsafe
+            //Convert to YCbCr
+            for (int y = 0; y < height; y++)
             {
-                System.Drawing.Imaging.BitmapData bitmapData = null;
-                try
+                for (int x = 0; x < width; x++)
                 {
-                    bitmapData = rgb_bitmap.LockBits(
-                        new System.Drawing.Rectangle(0, 0, width, height),
-                        System.Drawing.Imaging.ImageLockMode.ReadWrite,
-                        rgb_bitmap.PixelFormat);
-                    int heightInPixels = bitmapData.Height;
-                    int widthInBytes = width * 3;
-                    byte* ptrFirstPixel = (byte*)bitmapData.Scan0;
+                    var rgbPixel = rgb_array[y][x];
 
-                    //Convert to YCbCr
-                    for (int y = 0; y < heightInPixels; y++)
-                    {
-                        byte* currentLine = ptrFirstPixel + (y * bitmapData.Stride);
-                        for (int x = 0; x < width; x++)
-                        {
-                            int xPor3 = x * 3;
-                            float blue = currentLine[xPor3++];
-                            float green = currentLine[xPor3++];
-                            float red = currentLine[xPor3];
+                    float blue = rgbPixel.Blue;
+                    float green = rgbPixel.Green;
+                    float red = rgbPixel.Red;
 
-                            var data_y = (byte)((0.299 * red) + (0.587 * green) + (0.114 * blue));
-                            var data_cb = (byte)(128 - (0.168736 * red) + (0.331264 * green) + (0.5 * blue));
-                            var data_cr = (byte)(128 + (0.5 * red) + (0.418688 * green) + (0.081312 * blue));
+                    var data_y = (byte)((0.299 * red) + (0.587 * green) + (0.114 * blue));
+                    var data_cb = (byte)(128 - (0.168736 * red) + (0.331264 * green) + (0.5 * blue));
+                    var data_cr = (byte)(128 + (0.5 * red) + (0.418688 * green) + (0.081312 * blue));
 
-                            result_bitmap.SetPixel(x, y, Color.FromArgb(data_y, data_cb, data_cr));
-                        }
-                    }
-                }
-                finally
-                {
-                    if (bitmapData != null)
-                        rgb_bitmap.UnlockBits(bitmapData);
+                    var ycbcrPixel = ycbcr_array[y][x];
+
+                    ycbcrPixel.Red = data_y;
+                    ycbcrPixel.Green = data_cb;
+                    ycbcrPixel.Blue = data_cr;
+
+                    ycbcr_array[y][x] = ycbcrPixel;
                 }
             }
 
-            return result_bitmap;
+            return ycbcr_array;
         }
     }
 }

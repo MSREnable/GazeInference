@@ -201,6 +201,9 @@
     <PackageReference Include="System.Numerics.Tensors">
       <Version>5.0.0-preview.4.20251.6</Version>
     </PackageReference>
+    <PackageReference Include="WriteableBitmapEx">
+      <Version>1.6.5</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Model\itracker.onnx">

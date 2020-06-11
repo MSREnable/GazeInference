@@ -20,10 +20,17 @@
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20303.1" />
     <PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.20303.1" />
     <PackageReference Include="System.Numerics.Tensors" Version="5.0.0-preview.4.20251.6" />
+    <PackageReference Include="WriteableBitmapEx" Version="1.6.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GazeInference-Library\GazeInference-Library.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Windows.Foundation.UniversalApiContract">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\References\10.0.18362.0\Windows.Foundation.UniversalApiContract\8.0.0.0\Windows.Foundation.UniversalApiContract.winmd</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
