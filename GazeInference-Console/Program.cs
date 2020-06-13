@@ -1,7 +1,13 @@
-﻿using GazeInference_Library;
+﻿using DlibDotNet;
+using DlibDotNet.Dnn;
+using DlibDotNet.Extensions;
+using GazeInference_Library;
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace GazeInference_Console
 {
@@ -47,22 +53,45 @@ namespace GazeInference_Console
         public static Tuple<float, float> RunPredictionOnImage(
             string imagePath)
         {
-            Bitmap face_bitmap = null;
-            Bitmap left_eye_bitmap = null;
-            Bitmap right_eye_bitmap = null;
-            float[] face_grid = null;
-            var rgb_bitmap = (Bitmap)Image.FromFile(imagePath);
+            Array2D<RgbPixel> rgb_array2d_img = LoadArray2DfromFile(imagePath);
 
-            var isValid = ITrackerFaceExtracter.ExtractFaceDataFromImage(rgb_bitmap, ref face_bitmap, ref left_eye_bitmap, ref right_eye_bitmap, ref face_grid);
+            Array2D<RgbPixel> face_array2d_image = null;
+            Array2D<RgbPixel> left_eye_array2d_image = null;
+            Array2D<RgbPixel> right_eye_array2d_image = null;
+            float[] face_grid = null;
+
+            var isValid = ITrackerFaceExtracter.ExtractFaceDataFromImage(rgb_array2d_img, ref face_array2d_image, ref left_eye_array2d_image, ref right_eye_array2d_image, ref face_grid);
+
+            var face_bitmap_array = Array2DtoByteArray(face_array2d_image);
+            var left_eye_bitmap_array = Array2DtoByteArray(face_array2d_image);
+            var right_eye_bitmap_array = Array2DtoByteArray(face_array2d_image);
 
             if (isValid)
             {
-                var prediction = ITrackerPredictionEngine.RunPredictionOnImage(face_bitmap, left_eye_bitmap, right_eye_bitmap, face_grid);
+                var prediction = ITrackerPredictionEngine.RunPredictionOnImage(face_bitmap_array, left_eye_bitmap_array, right_eye_bitmap_array, face_grid);
 
                 return prediction;
             }
 
             return null;
+        }
+
+        const uint IMAGE_BIT_DEPTH = 3;
+
+        private static Array2D<RgbPixel> LoadArray2DfromFile(string imagePath)
+        {
+            return Dlib.LoadImage<RgbPixel>(imagePath);
+        }
+
+        private static byte[] Array2DtoByteArray(Array2D<RgbPixel> face_array2d_image)
+        {
+            return face_array2d_image.ToBitmap<RgbPixel>().ToByteArray(ImageFormat.Bmp);
+        }
+
+        private static Array2D<RgbPixel> BitmapToArray2D(
+            Bitmap input_bitmap)
+        {
+            return Dlib.LoadImageData<RgbPixel>(ImagePixelFormat.Rgb, input_bitmap.ToByteArray(ImageFormat.Bmp), (uint)input_bitmap.Height, (uint)input_bitmap.Width, IMAGE_BIT_DEPTH);
         }
     }
 }

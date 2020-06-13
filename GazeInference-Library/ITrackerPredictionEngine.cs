@@ -59,6 +59,24 @@ namespace GazeInference_Library
         }
 
         public static Tuple<float, float> RunPredictionOnImage(
+            byte[] face_array,
+            byte[] left_eye_array,
+            byte[] right_eye_array,
+            float[] face_grid)
+        {
+
+            var face_bitmap = (Bitmap)Image.FromStream(new MemoryStream(face_array));
+            var left_eye_bitmap = (Bitmap)Image.FromStream(new MemoryStream(left_eye_array));
+            var right_eye_bitmap = (Bitmap)Image.FromStream(new MemoryStream(right_eye_array));
+
+            return RunPredictionOnImage(
+                face_bitmap,
+                left_eye_bitmap,
+                right_eye_bitmap,
+                face_grid);
+        }
+
+        public static Tuple<float, float> RunPredictionOnImage(
             Bitmap face_bitmap,
             Bitmap left_eye_bitmap,
             Bitmap right_eye_bitmap,

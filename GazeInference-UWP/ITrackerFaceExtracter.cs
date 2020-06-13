@@ -1,9 +1,4 @@
 ﻿using DlibDotNet;
-using DlibDotNet.Extensions;
-using System;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using Windows.UI.ViewManagement.Core;
 
 namespace GazeInference_Library
 {
@@ -23,17 +18,16 @@ namespace GazeInference_Library
         private static readonly bool debugData = false;
 
         public static bool ExtractFaceDataFromImage(
-            Bitmap rgb_bitmap,
-            ref Bitmap face_bitmap,
-            ref Bitmap left_eye_bitmap,
-            ref Bitmap right_eye_bitmap,
+            Array2D<RgbPixel> rgb_array2d_img,
+            ref Array2D<RgbPixel> face_array2d_img,
+            ref Array2D<RgbPixel> left_eye_array2d_img,
+            ref Array2D<RgbPixel> right_eye_array2d_img,
             ref float[] face_grid)
         {
-            var rgb_array2d_img = BitmapToRgbPixel(rgb_bitmap);
             var ycbcr_array2d_img = RgbToYCbCr(rgb_array2d_img);
 
-            Dlib.SaveJpeg(rgb_array2d_img, "face_rgb.jpg");
-            Dlib.SaveJpeg(ycbcr_array2d_img, "face_ycbcr.jpg");
+            //Dlib.SaveJpeg(rgb_array2d_img, "face_rgb.jpg");
+            //Dlib.SaveJpeg(ycbcr_array2d_img, "face_ycbcr.jpg");
 
             var face_rects = detector.Operator(rgb_array2d_img);
 
@@ -57,9 +51,9 @@ namespace GazeInference_Library
                     face_rect,
                     left_eye_rect_normalized,
                     right_eye_rect_normalized,
-                    ref face_bitmap,
-                    ref left_eye_bitmap,
-                    ref right_eye_bitmap,
+                    ref face_array2d_img,
+                    ref left_eye_array2d_img,
+                    ref right_eye_array2d_img,
                     ref face_grid);
             }
 
@@ -69,9 +63,9 @@ namespace GazeInference_Library
         private static void DrawDebugDataOnImage(
             Array2D<RgbPixel> img,
             FullObjectDetection shape,
-            DlibDotNet.Rectangle face_rect,
-            DlibDotNet.Rectangle left_eye_rect,
-            DlibDotNet.Rectangle right_eye_rect)
+            Rectangle face_rect,
+            Rectangle left_eye_rect,
+            Rectangle right_eye_rect)
         {
             if (debugData)
             {
@@ -79,7 +73,7 @@ namespace GazeInference_Library
                 for (uint i = 0; i < shape.Parts; ++i)
                 {
                     var point = shape.GetPart(i);
-                    var rect = new DlibDotNet.Rectangle(point);
+                    var rect = new Rectangle(point);
                     var color = new RgbPixel(255, 255, 0);
 
                     if (i >= 36 && i <= 41)
@@ -100,33 +94,29 @@ namespace GazeInference_Library
 
         private static void GenerateInputs(
             Array2D<RgbPixel> img,
-            DlibDotNet.Rectangle face_rect,
-            DlibDotNet.Rectangle left_eye_rect,
-            DlibDotNet.Rectangle right_eye_rect,
-            ref Bitmap face_bitmap,
-            ref Bitmap left_eye_bitmap,
-            ref Bitmap right_eye_bitmap,
+            Rectangle face_rect,
+            Rectangle left_eye_rect,
+            Rectangle right_eye_rect,
+            ref Array2D<RgbPixel> face_image,
+            ref Array2D<RgbPixel> left_eye_image,
+            ref Array2D<RgbPixel> right_eye_image,
             ref float[] face_grid)
         {
-            var face_image = GenerateCroppedImage(img, face_rect);
-            var left_eye_image = GenerateCroppedImage(img, left_eye_rect);
-            var right_eye_image = GenerateCroppedImage(img, right_eye_rect);
+            face_image = GenerateCroppedImage(img, face_rect);
+            left_eye_image = GenerateCroppedImage(img, left_eye_rect);
+            right_eye_image = GenerateCroppedImage(img, right_eye_rect);
             face_grid = GenerateFaceGrid(img, face_rect);
-
-            face_bitmap = face_image.ToBitmap<RgbPixel>();
-            left_eye_bitmap = left_eye_image.ToBitmap<RgbPixel>();
-            right_eye_bitmap = right_eye_image.ToBitmap<RgbPixel>();
         }
 
         private static float[] GenerateFaceGrid(
             Array2D<RgbPixel> img,
-            DlibDotNet.Rectangle face_rect)
+            Rectangle face_rect)
         {
             var image_width = img.Columns;
             var image_height = img.Rows;
 
             const int grid_size = 25;
-            var face_grid_rect = new DlibDotNet.Rectangle(
+            var face_grid_rect = new Rectangle(
                 (int)((float)face_rect.TopLeft.X / image_width * grid_size),
                 (int)((float)face_rect.TopLeft.Y / image_height * grid_size),
                 (int)(((float)face_rect.TopLeft.X + face_rect.Width) / image_width * grid_size),
@@ -154,7 +144,7 @@ namespace GazeInference_Library
 
         private static Array2D<RgbPixel> GenerateCroppedImage(
             Array2D<RgbPixel> img,
-            DlibDotNet.Rectangle rect)
+            Rectangle rect)
         {
             DPoint[] dPoint = new DPoint[] {
                     new DPoint(rect.TopLeft.X, rect.TopLeft.Y),
@@ -168,24 +158,24 @@ namespace GazeInference_Library
             return cropped_image;
         }
 
-        private static DlibDotNet.Rectangle GetEyeRectSizeNormalized(
-            DlibDotNet.Rectangle face_rect,
-            DlibDotNet.Rectangle eye_rect)
+        private static Rectangle GetEyeRectSizeNormalized(
+            Rectangle face_rect,
+            Rectangle eye_rect)
         {
             // matches face_utilities.py
             // find center of eye
-            var eye_center = new DlibDotNet.Point(
+            var eye_center = new Point(
                 eye_rect.Left + (int)(eye_rect.Width / 2),
                 eye_rect.Top + (int)(eye_rect.Height / 2));
 
             // eye box is 3/10 of the face width
             var eye_side = (int)(3 * face_rect.Width / 10);
 
-            var eye_tl = new DlibDotNet.Point(
+            var eye_tl = new Point(
                 eye_center.X - (int)(eye_side / 2),
                 eye_center.Y - (int)(eye_side / 2));
 
-            var eye_rect_size_normalized = new DlibDotNet.Rectangle(
+            var eye_rect_size_normalized = new Rectangle(
                 eye_tl.X,
                 eye_tl.Y,
                 eye_tl.X + eye_side,
@@ -194,12 +184,12 @@ namespace GazeInference_Library
             return eye_rect_size_normalized;
         }
 
-        private static DlibDotNet.Rectangle GetRectangleRelative(
-            DlibDotNet.Rectangle outer,
-            DlibDotNet.Rectangle inner)
+        private static Rectangle GetRectangleRelative(
+            Rectangle outer,
+            Rectangle inner)
         {
             // inner rectangle must be within the outer rectangle
-            var relative_rect = new DlibDotNet.Rectangle(
+            var relative_rect = new Rectangle(
                 inner.TopLeft.X - outer.TopLeft.X,
                 inner.TopLeft.Y - outer.TopLeft.Y,
                 inner.BottomRight.X - outer.TopLeft.X,
@@ -209,7 +199,7 @@ namespace GazeInference_Library
             return relative_rect;
         }
 
-        private static DlibDotNet.Rectangle GetRect(
+        private static Rectangle GetRect(
             FullObjectDetection shape,
             int start,
             int end)
@@ -233,30 +223,9 @@ namespace GazeInference_Library
                     max_right = point.X;
             }
 
-            var rect = new DlibDotNet.Rectangle(min_left, min_top, max_right, max_bottom);
+            var rect = new Rectangle(min_left, min_top, max_right, max_bottom);
 
             return rect;
-        }
-
-        private static Array2D<RgbPixel> BitmapToRgbPixel(
-            Bitmap input_bitmap)
-        {
-            Array2D<RgbPixel> array2d = null;
-
-            var data = input_bitmap.LockBits(new System.Drawing.Rectangle(0, 0, input_bitmap.Width, input_bitmap.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly, input_bitmap.PixelFormat);
-            try
-            {
-                var array = new byte[data.Stride * data.Height];
-                Marshal.Copy(data.Scan0, array, 0, array.Length);
-                array2d = Dlib.LoadImageData<RgbPixel>(ImagePixelFormat.Bgr, array, (uint)input_bitmap.Height, (uint)input_bitmap.Width, (uint)data.Stride);
-            }
-            finally
-            {
-                input_bitmap.UnlockBits(data);
-            }
-
-            return array2d;
         }
 
         private static Array2D<RgbPixel> RgbToYCbCr(
