@@ -13,7 +13,7 @@ namespace GazeInference_Library
         const int RIGHT_EYE_END = 47;
 
         private static readonly FrontalFaceDetector detector = Dlib.GetFrontalFaceDetector();
-        private static readonly ShapePredictor sp = ShapePredictor.Deserialize("shape_predictor_68_face_landmarks.dat");
+        private static readonly ShapePredictor sp = ShapePredictor.Deserialize("Assets\\Model\\shape_predictor_68_face_landmarks.dat");
 
         private static readonly bool debugData = false;
 

@@ -171,9 +171,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DlibDotNet">
-      <Version>19.18.0.20200525</Version>
-    </PackageReference>
     <PackageReference Include="DlibDotNet.Extensions">
       <Version>19.18.0.20200428</Version>
     </PackageReference>
@@ -207,6 +204,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Model\itracker.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Model\shape_predictor_68_face_landmarks.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
