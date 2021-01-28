@@ -18,6 +18,7 @@
 #include <winrt/Windows.AI.MachineLearning.h>
 #include <winrt/Windows.Graphics.Imaging.h>
 #include <winrt/Windows.Media.h>
+#include <winrt/Windows.Media.MediaProperties.h>
 #include <winrt/Windows.Storage.h>
 
 
@@ -25,6 +26,8 @@
 #include <winrt/Windows.Media.Capture.h>
 #include <winrt/Windows.Media.Playback.h>
 #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
+
+#include <winrt/Windows.System.Display.h>
 
 
 #include <winrt/Windows.UI.Core.h> // for resume_foreground method

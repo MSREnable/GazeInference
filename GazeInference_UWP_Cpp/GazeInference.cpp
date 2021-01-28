@@ -6,7 +6,7 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
     // Constructor
     GazeInference::GazeInference()
     {
-
+        config = InferenceConfig();
     }
 
     template<typename ... Args>
@@ -93,11 +93,8 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
 
     IAsyncAction GazeInference::RunInferencePipelineAsync(TextBlock textblock)
     {
-        //hstring m_imagePath{ imagePath };
         // image path is going to be a dynamic input
         hstring imagePath = L"ms-appx:///Assets/kitten_224.png";
-        InferenceConfig config = InferenceConfig();
-        int k = 3;
 
         config.model = co_await LoadModelOpAsync(textblock, config);
         config.imageFrame = co_await LoadImageFileOPAsync(textblock, imagePath);
@@ -105,16 +102,12 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
         config.binding = co_await CreateBindingOpAsync(textblock, config);
         IVectorView<float> results = co_await EvaluateModelOpAsync(textblock, config);
         IVectorView<hstring> labels = co_await LoadLabelsOpAsync(textblock, config);
-        IMap<hstring, float> output = GetTopK(results, labels, k);
+        IMap<hstring, float> output = GetTopK(results, labels, config.k);
         PrintOutput(textblock, output);
     }
 
     IAsyncAction GazeInference::RunCameraInferencePipelineAsync(TextBlock textblock, Image imageControl)
     {
-        
-        InferenceConfig config = InferenceConfig();
-        int k = 3;
-
         config.model = co_await LoadModelOpAsync(textblock, config);
         // imageFrame is going to be a dynamic input from the CameraCapture
         StorageFile file = co_await GetPhotoAsync(textblock);
@@ -123,8 +116,47 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
         config.binding = co_await CreateBindingOpAsync(textblock, config);
         IVectorView<float> results = co_await EvaluateModelOpAsync(textblock, config);
         IVectorView<hstring> labels = co_await LoadLabelsOpAsync(textblock, config);
-        IMap<hstring, float> output = GetTopK(results, labels, k);
+        IMap<hstring, float> output = GetTopK(results, labels, config.k);
         PrintOutput(textblock, output);
+    }
+
+    IAsyncAction GazeInference::RunMediaCaptureInferencePipelineAsync(TextBlock textblock, CaptureElement previewControl)
+    {
+        config.model = co_await LoadModelOpAsync(textblock, config);
+        // imageFrame is going to be a dynamic input from the CameraCapture
+        config.mediaCapture = co_await StartPreviewAsync(textblock, previewControl, config);
+        config.imageFrame = co_await GetFrameAsync(textblock, config);
+        config.session = co_await CreateSessionOpAsync(textblock, config);
+        config.binding = co_await CreateBindingOpAsync(textblock, config);
+        IVectorView<float> results = co_await EvaluateModelOpAsync(textblock, config);
+        IVectorView<hstring> labels = co_await LoadLabelsOpAsync(textblock, config);
+        IMap<hstring, float> output = GetTopK(results, labels, config.k);
+        PrintOutput(textblock, output);
+        config.mediaCapture = co_await StopPreviewAsync(textblock, previewControl, config);
+
+
+        //if (config.isPreviewing == true) {
+        //    config.isPreviewing = false;
+        //}
+        //else {
+        //    config.isPreviewing = true;
+        //}
+
+        //// One time operations
+        //config.model = co_await LoadModelOpAsync(textblock, config);
+        //IVectorView<hstring> labels = co_await LoadLabelsOpAsync(textblock, config);
+
+        //// imageFrame is going to be a dynamic input from the CameraCapture
+        //config.mediaCapture = co_await StartPreviewAsync(textblock, previewControl, config);
+        //while (config.isPreviewing) {
+        //    config.imageFrame = co_await GetFrameAsync(textblock, config);
+        //    config.session = co_await CreateSessionOpAsync(textblock, config);
+        //    config.binding = co_await CreateBindingOpAsync(textblock, config);
+        //    IVectorView<float> results = co_await EvaluateModelOpAsync(textblock, config);
+        //    IMap<hstring, float> output = GetTopK(results, labels, config.k);
+        //    PrintOutput(textblock, output);
+        //}
+        //config.mediaCapture = co_await StopPreviewAsync(textblock, previewControl, config);
     }
 
     IAsyncOperation<LearningModel> GazeInference::LoadModelOpAsync(TextBlock textblock, InferenceConfig config)
@@ -231,6 +263,7 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
         StorageFile m_file{ file };
         //Image m_imageControl{ imageControl };
         SoftwareBitmapSource bitmapSourceDisplay;
+        SoftwareBitmap softwareBitmap = nullptr;
 
         // switch to backgroung thread-pool
         co_await winrt::resume_background();
@@ -241,24 +274,16 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
         
         try
         {
-            
             // get a stream on it
             auto stream = co_await m_file.OpenAsync(FileAccessMode::Read);
             // Create the decoder from the stream
             BitmapDecoder decoder = co_await BitmapDecoder::CreateAsync(stream);
             
             // get the bitmap type
-            SoftwareBitmap softwareBitmap = co_await decoder.GetSoftwareBitmapAsync();
+            softwareBitmap = co_await decoder.GetSoftwareBitmapAsync();
 
-            // load a videoframe from it
+            // create a videoframe from it
             inputImage = VideoFrame::CreateWithSoftwareBitmap(softwareBitmap);
-
-            // The Image control requires that the image source be in BGRA8 format and premultiplied
-            SoftwareBitmap softwareBitmapBGR8 = SoftwareBitmap::Convert(softwareBitmap,
-                BitmapPixelFormat::Bgra8,
-                BitmapAlphaMode::Premultiplied);
-
-            co_await bitmapSourceDisplay.SetBitmapAsync(softwareBitmapBGR8);
 
             ticks = GetTickCount() - ticks;
             debugString = to_hstring(string_format("Image file loded in %d ticks", ticks));
@@ -268,10 +293,16 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
             debugString = L"Error: Failed to load the image file. Please check that the filepath exists.";
         }
 
-        //imageControl.Source(bitmapSourceDisplay);
         // Switch to the foreground thread associated with textblock.
         co_await winrt::resume_foreground(textblock.Dispatcher());
         textblock.Text(textblock.Text() + L"\n" + to_hstring(__FUNCTION__) + L" : " + debugString);
+
+        // Update the preview in foreground thread
+        // The Image control requires that the image source be in BGRA8 format and premultiplied
+        SoftwareBitmap softwareBitmapBGR8 = SoftwareBitmap::Convert(softwareBitmap,
+                                            BitmapPixelFormat::Bgra8,
+                                            BitmapAlphaMode::Premultiplied);
+        co_await bitmapSourceDisplay.SetBitmapAsync(softwareBitmapBGR8);
         imageControl.Source(bitmapSourceDisplay);
 
         co_return inputImage;
@@ -373,8 +404,6 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
             // get the output
             TensorFloat resultTensor = results.Outputs().Lookup(L"softmaxout_1").as<TensorFloat>();
             resultVector = resultTensor.GetAsVectorView();
-            //resultTensor
-            //PrintResults(resultVector);
 
             ticks = GetTickCount() - ticks;
             debugString = to_hstring(string_format("Evaluated model in %d ticks", ticks));
@@ -477,27 +506,57 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
         co_return photo;
     }
 
-    //IAsyncAction Camera()
-    //{
-    //    auto cameraManager = CameraCaptureUI();
-    //    cameraManager.PhotoSettings().CroppedAspectRatio(Size(4, 3));//16,9
-    //    cameraManager.PhotoSettings().Format(CameraCaptureUIPhotoFormat::Jpeg);
-    //    auto file{ co_await cameraManager.CaptureFileAsync(CameraCaptureUIMode::Photo) };
-    //}
+    IAsyncOperation<VideoFrame> GazeInference::GetFrameAsync(TextBlock textblock, InferenceConfig config)
+    {
+        // Create coroutine copy of input variables
+        InferenceConfig m_config{ config };
 
-    //IAsyncAction Camera()
-    //{
-    //    auto cameraManager = CameraCaptureUI();
-    //    cameraManager.PhotoSettings().CroppedAspectRatio(Size(4, 3));//16,9
-    //    cameraManager.PhotoSettings().Format(CameraCaptureUIPhotoFormat::Jpeg);
-    //    auto file{ co_await cameraManager.CaptureFileAsync(CameraCaptureUIMode::Photo) };
+        // Prepare and capture photo
+        ImageEncodingProperties properties = ImageEncodingProperties::CreateUncompressed(MediaPixelFormat::Bgra8);
+        LowLagPhotoCapture lowLagCapture = co_await m_config.mediaCapture.PrepareLowLagPhotoCaptureAsync(properties);
 
-    //    //CameraCaptureUIMaxVideoResolution MaxResolution();
-    //    //void MaxResolution(CameraCaptureUIMaxVideoResolution value);
+        CapturedPhoto capturedPhoto = co_await lowLagCapture.CaptureAsync();
+        SoftwareBitmap softwareBitmap = capturedPhoto.Frame().SoftwareBitmap();
+        co_await lowLagCapture.FinishAsync();
 
-    //    //Capture::CameraCaptureUIVideoCaptureSettings videoSettings = cameraManager.VideoSettings();
-    //}
+        textblock.Text(textblock.Text() + L"\n" + to_hstring(__FUNCTION__) + L" : " + L"Complete!");
+        co_return VideoFrame::CreateWithSoftwareBitmap(softwareBitmap);
+    }
 
+    IAsyncOperation<MediaCapture> GazeInference::StartPreviewAsync(TextBlock textblock, CaptureElement previewControl, InferenceConfig config)
+    {
+        InferenceConfig m_config{ config };
+        hstring debugString;
+
+        try
+        {
+            m_config.mediaCapture = MediaCapture();
+            co_await m_config.mediaCapture.InitializeAsync();
+        }
+        catch (...) 
+        {
+            debugString = L"The app was denied access to the camera.";
+        }
+        previewControl.Source(m_config.mediaCapture);
+        co_await m_config.mediaCapture.StartPreviewAsync();
+
+        debugString = L"Media preview started successfully.";
+        textblock.Text(textblock.Text() + L"\n" + to_hstring(__FUNCTION__) + L" : " + debugString);
+        co_return m_config.mediaCapture;
+    }
+
+    IAsyncOperation<MediaCapture> GazeInference::StopPreviewAsync(TextBlock textblock, CaptureElement previewControl, InferenceConfig config)
+    {
+        InferenceConfig m_config{config};
+
+        if (m_config.mediaCapture != nullptr)
+        {
+            co_await m_config.mediaCapture.StopPreviewAsync();
+            previewControl.Source(nullptr);
+        }
+        textblock.Text(textblock.Text() + L"\n" + to_hstring(__FUNCTION__) + L" : " + L"Complete!");
+        co_return m_config.mediaCapture;
+    }
 }
 
 

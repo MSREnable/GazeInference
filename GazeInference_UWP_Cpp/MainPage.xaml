@@ -9,11 +9,14 @@
 
     <StackPanel x:Name="contentPanel" Margin="120,30,0,0">
         <TextBlock HorizontalAlignment="Left" Text="GazeInference WinRT/C++" FontSize="36"/>
-        <Image x:Name="imageControl" Width="224" Height="224" Visibility="Visible"/>
-        <StackPanel x:Name="inputPanel" Orientation="Horizontal" Margin="0,20,0,20">
-            <!--<TextBox x:Name="nameInput" Width="300" HorizontalAlignment="Left"/>-->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
+            <Image x:Name="imageControl" Width="224" Height="224"/>
+            <CaptureElement x:Name="previewControl" Stretch="Uniform" Width="224" Height="224"/>
+        </StackPanel>
+        <StackPanel x:Name="inputPanel" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
             <Button x:Name="BtnRunInferencePipeline" Click="BtnRunInferencePipeline_Handler" Content="Run (path)"/>
             <Button x:Name="BtnRunCameraInferencePipeline" Click="BtnRunCameraInferencePipeline_Handler" Content="Run (camera)"/>
+            <Button x:Name="BtnRunMediaCaptureInferencePipeline" Click="BtnRunMediaCaptureInferencePipeline_Handler" Content="Run (live)"/>
             <Button x:Name="BtnClearConsole" Click="BtnClearConsole_Handler" Content="Clear Console"/>
         </StackPanel>
         <TextBlock x:Name="consoleHeadingBlock" Text="Logs:"/>

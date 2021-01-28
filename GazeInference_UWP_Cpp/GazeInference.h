@@ -17,10 +17,12 @@ using namespace Windows::Data::Text;
 
 using namespace Windows::Media::Capture;
 using namespace Windows::Media::Playback;
+using namespace Windows::Media::MediaProperties;
 
 using namespace Windows::Graphics::Imaging;
 using namespace Windows::Storage::Streams;
 using namespace Windows::UI::Xaml::Media::Imaging;
+
 
 
 using namespace std;
@@ -32,15 +34,25 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
     {
         GazeInference();
 
+        InferenceConfig config;
+
         IAsyncAction GazeInference::RunInferencePipelineAsync(TextBlock textblock);
         IAsyncAction GazeInference::RunCameraInferencePipelineAsync(TextBlock textblock, Image imageControl);
+        IAsyncAction GazeInference::RunMediaCaptureInferencePipelineAsync(TextBlock textblock, CaptureElement previewControl);
+
         IAsyncAction GazeInference::DoWorkAsync(TextBlock textblock);
+        IAsyncOperation<MediaCapture> GazeInference::StartPreviewAsync(TextBlock textblock, CaptureElement previewControl, InferenceConfig config);
+        IAsyncOperation<MediaCapture> GazeInference::StopPreviewAsync(TextBlock textblock, CaptureElement previewControl, InferenceConfig config);
 
         IAsyncOperation<StorageFile> GazeInference::GetPhotoAsync(TextBlock textblock);
+        IAsyncOperation<VideoFrame> GazeInference::GetFrameAsync(TextBlock textblock, InferenceConfig config);
+
+
         IAsyncOperation<LearningModel> GazeInference::LoadModelOpAsync(TextBlock textblock, InferenceConfig config);
         IAsyncOperation<VideoFrame> GazeInference::LoadImageFileOPAsync(TextBlock textblock, hstring imagePath);
         IAsyncOperation<VideoFrame> GazeInference::LoadImageFileOPAsync(TextBlock textblock, StorageFile file);
         IAsyncOperation<VideoFrame> GazeInference::LoadImageFileOPAsync(TextBlock textblock, StorageFile file, Image imageControl);
+
         IAsyncOperation<LearningModelSession> GazeInference::CreateSessionOpAsync(TextBlock textblock, InferenceConfig config);
         IAsyncOperation<LearningModelBinding> GazeInference::CreateBindingOpAsync(TextBlock textblock, InferenceConfig config);
         IAsyncOperation<IVectorView<float>> GazeInference::EvaluateModelOpAsync(TextBlock textblock, InferenceConfig config);

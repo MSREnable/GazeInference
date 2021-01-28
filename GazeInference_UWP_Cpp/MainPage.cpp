@@ -11,6 +11,7 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
     MainPage::MainPage()
     {
         InitializeComponent();
+        GazeInference gazeInference = GazeInference();
     }
 
     int32_t MainPage::MyProperty()
@@ -25,12 +26,17 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
 
     void MainPage::BtnRunInferencePipeline_Handler(IInspectable const&, RoutedEventArgs const&)
     {
-        GazeInference().RunInferencePipelineAsync(consoleTextBlock());
+        gazeInference.RunInferencePipelineAsync(consoleTextBlock());
     }
 
     void MainPage::BtnRunCameraInferencePipeline_Handler(IInspectable const&, RoutedEventArgs const&)
     {
-        GazeInference().RunCameraInferencePipelineAsync(consoleTextBlock(), imageControl());
+        gazeInference.RunCameraInferencePipelineAsync(consoleTextBlock(), imageControl());
+    }
+
+    void MainPage::BtnRunMediaCaptureInferencePipeline_Handler(IInspectable const&, RoutedEventArgs const&)
+    {
+        gazeInference.RunMediaCaptureInferencePipelineAsync(consoleTextBlock(), previewControl());
     }
 
     void MainPage::BtnClearConsole_Handler(IInspectable const&, RoutedEventArgs const&)
@@ -38,4 +44,15 @@ namespace winrt::GazeInference_UWP_Cpp::implementation
         // Clear the console
         consoleTextBlock().Text(L"");
     }
+
+
+    //void MainPage::OnNavigatedTo(NavigationEventArgs const& e)
+    //{
+    //    GazeInference().StartPreviewAsync(consoleTextBlock(), previewControl());
+    //}
+
+    //void MainPage::OnNavigatingFrom(NavigatingCancelEventArgs const& e)
+    //{
+    //    GazeInference().StopPreviewAsync(consoleTextBlock(), previewControl());
+    //}
 }
