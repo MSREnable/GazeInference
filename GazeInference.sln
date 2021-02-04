@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GazeInference-Library", "Ga
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GazeInference_UWP_Cpp", "GazeInference_UWP_Cpp\GazeInference_UWP_Cpp.vcxproj", "{4E381871-D289-4C5A-9C25-37F63670250B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GazeInference_WinCpp", "GazeInference_WinCpp\GazeInference_WinCpp.vcxproj", "{D74990CE-DE7C-4118-8C43-490F775BC638}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,20 @@ Global
 		{4E381871-D289-4C5A-9C25-37F63670250B}.Release|x86.ActiveCfg = Release|Win32
 		{4E381871-D289-4C5A-9C25-37F63670250B}.Release|x86.Build.0 = Release|Win32
 		{4E381871-D289-4C5A-9C25-37F63670250B}.Release|x86.Deploy.0 = Release|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Debug|ARM.ActiveCfg = Debug|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Debug|x64.ActiveCfg = Debug|x64
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Debug|x64.Build.0 = Debug|x64
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Debug|x86.ActiveCfg = Debug|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Debug|x86.Build.0 = Debug|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Release|Any CPU.ActiveCfg = Release|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Release|ARM.ActiveCfg = Release|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Release|ARM64.ActiveCfg = Release|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Release|x64.ActiveCfg = Release|x64
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Release|x64.Build.0 = Release|x64
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Release|x86.ActiveCfg = Release|Win32
+		{D74990CE-DE7C-4118-8C43-490F775BC638}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
