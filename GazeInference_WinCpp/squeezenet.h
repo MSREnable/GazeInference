@@ -1,62 +1,93 @@
 #pragma once
 #include "framework.h"
-#include "Utils.h"
+#include "Model.h"
+#include "LiveCapture.h"
 
 
-// This is the structure to interface with the SqueezeNet model
-// After instantiation, set the input data to be the 3x224x224 pixel image of the number to recognize
-// Then call Run() to fill in the output data with the probabilities of each
-// result holds the index with highest probability (aka the number the model thinks is in the image)
-struct SqueezeNet {
-    SqueezeNet() {
-
-        // Modify session options here 
-        //session_options.SetIntraOpNumThreads(1);
-        ////OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, 1);
-        //session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
-
-        Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(
-        OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
-        inputTensors.push_back(Ort::Value::CreateTensor<float>(memoryInfo, 
-            inputTensorValues.data(), inputTensorSize, 
-            inputDims.data(), inputDims.size()));
-        outputTensors.push_back(Ort::Value::CreateTensor<float>(memoryInfo, 
-            outputTensorValues.data(), outputTensorSize,
-            outputDims.data(), outputDims.size()));
+// SqueezeNet Model
+class SqueezeNet : public Model
+{
+private:
+    cv::Mat frame;
+    std::tuple<std::string, float> result = std::tuple<std::string, float>("Unknown", 0.0f);
+    std::unique_ptr<LiveCapture> live_capture;
+    std::vector<std::string> labels;
+public:
+    SqueezeNet(const wchar_t* modelFilePath, const wchar_t* labelFilepath)
+        : Model{ modelFilePath }
+    {
+        // Load labels from filepath into a vector
+        // TODO: Pass customLoadLabel func
+        if (labelFilepath) {
+            USES_CONVERSION;
+            labels = loadLabels(std::string(W2A(labelFilepath)));
+        }
     }
 
     ~SqueezeNet() {
-        // Cleanup ORT memory variables here
-        env.release();
-        session_options.release();
-        session.release();
-        inputTypeInfo.release();
-        inputTensorInfo.release();
-        outputTypeInfo.release();
-        outputTensorInfo.release();
-        
+        // Cleanup 
     }
 
-    std::tuple<std::string, float> run() {
-        std::vector<const char*> inputNames{ inputName };
-        std::vector<const char*> outputNames{ outputName };
-
-        session.Run(Ort::RunOptions{ nullptr }, 
-            inputNames.data(), inputTensors.data(), 1, 
-            outputNames.data(), outputTensors.data(), 1);
-
-        std::vector<float>::iterator predictionProbablity = std::max_element(outputTensorValues.begin(), outputTensorValues.end());
-        int predictionIndex = std::distance(outputTensorValues.begin(), predictionProbablity);
-
-        std::get<0>(result) = labels.at(predictionIndex);
-        std::get<1>(result) = predictionProbablity[0];
-
-        printOutput(result);
-        return result;
+    bool init() {
+        live_capture = std::make_unique<LiveCapture>(0, 30, cv::Size(640, 480));
+        live_capture->open();
+        return live_capture->is_open();
     }
 
+    std::vector<std::string> loadLabels(std::string labelFilepath)
+    {
+        std::vector<std::string> labels;
+        // Parse labels from labels file.  We know the file's entries are already sorted in order.
+        std::ifstream labelFile{ labelFilepath, std::ifstream::in };
+        if (labelFile.fail())
+        {
+            LOG_ERROR("failed to load the %s file.  Make sure it exists in the same folder as the app\r\n", labelFilepath.c_str());
+            exit(EXIT_FAILURE);
+        }
 
-    //void FillInputTensor(std::string imageFilepath) {
+        std::string line;
+        while (std::getline(labelFile, line, ','))
+        {
+            int labelValue = atoi(line.c_str());
+            if (labelValue >= labels.size())
+            {
+                labels.resize(labelValue + 1);
+            }
+            std::getline(labelFile, line);
+            labels[labelValue] = line;
+        }
+        return labels;
+    }
+
+    bool getFrameFromImagePath(std::string imageFilepath) {
+        return live_capture->getFrameFromImagePath(imageFilepath, frame);
+    }
+
+    bool getCameraFrame() {
+        return live_capture->getFrame(frame);
+    }
+
+    void showRawInput() {
+        live_capture->showRawInput(frame);
+    }
+
+    bool applyTransformations() {
+        cv::Mat resizedImage, preprocessedImage;
+        cv::resize(frame, resizedImage,
+            cv::Size(224, 224),
+            cv::InterpolationFlags::INTER_CUBIC);
+
+        // HWC to CHW
+        cv::dnn::blobFromImage(resizedImage, preprocessedImage);
+         
+        // TODO: Make it faster by initing the preprocessedFrames and reusing
+        preprocessedFrames.clear();
+        preprocessedFrames.push_back(preprocessedImage);
+
+        return true;
+    }
+
+    //    void applyTransformations(std::string imageFilepath) {
 
     //    cv::Mat imageBGR = cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
     //    cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, preprocessedImage;
@@ -84,133 +115,28 @@ struct SqueezeNet {
     //}
 
 
-    void initCamera() {
-        // open camera for video stream
-        capture = VideoCapture(0);
+    std::tuple<std::string, float> processOutput(BOOL displayLabels) {
+        std::vector<float> output = outputs[0].values;// select first output
+        std::vector<float>::iterator predictionProbablity = std::max_element(output.begin(), output.end());
+        int predictionIndex = std::distance(output.begin(), predictionProbablity);
 
-        // if not success, exit program
-        if (!capture.isOpened())
-        {
-            //"Cannot open the video camera" 
-            cin.get(); //wait for any key press
-        }
+        std::get<0>(result) = labels.at(predictionIndex);
+        std::get<1>(result) = predictionProbablity[0];
 
-        //get the frames rate of the video
-        double fps = capture.get(CAP_PROP_FPS);
-        double width = capture.get(CAP_PROP_FRAME_WIDTH);
-        double height = capture.get(CAP_PROP_FRAME_HEIGHT);
-        namedWindow(window_name, WINDOW_NORMAL); //create a window
-    }
-
-    bool getCameraFrame() {
-        bool bSuccess = capture.read(frame); // read a new frame from video 
-        // Breaking the while loop at the end of the video
-        if (bSuccess == false) {
-            //"Video camera disconnected"
-        }
-        // resize image to 224x224
-        cv::resize(frame, frame, cv::Size(224, 224), cv::InterpolationFlags::INTER_CUBIC);
-
-        // Return False on Esc key 
-        int delay_ms = 1;
-        if (waitKey(delay_ms) == 27) {
-            return false;
-        }  
-        else {
-            return true;
-        }
-    }
-
-    void getFrameFromImagePath(string imageFilepath) {
-        frame = cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
-        // resize image to 224x224
-        cv::resize(frame, frame, cv::Size(224, 224), cv::InterpolationFlags::INTER_CUBIC);
-    }
-
-    void fillInputTensor() {
-        cv::Mat preprocessedImage;
-        // HWC to CHW
-        cv::dnn::blobFromImage(frame, preprocessedImage);
-        // fill the inputTensorValues
-        inputTensorValues.assign(preprocessedImage.begin<float>(),
-            preprocessedImage.end<float>());
+        if (displayLabels)
+            printOutput(result);
+        return result;
     }
 
     void printOutput(std::tuple<std::string, float> result) {
         char displayString[100];
         sprintf_s(displayString, "%s (%f)", std::get<0>(result).c_str(), std::get<1>(result));
         // specify the fontand draw the key using puttext
-        putText(frame, displayString, Point(10, 10), FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, LINE_AA);
+        cv::putText(frame, displayString, cv::Point(10, 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv::LINE_AA);
         //show the frame in the created window
-        imshow(window_name, frame);
+        cv::imshow("Output", frame);
+        cv::waitKey(1);
     }
-
-    int benchmark() {
-        // Measure latency over large number of samples
-        int numTests{ 100 };
-        std::vector<const char*> inputNames{ inputName };
-        std::vector<const char*> outputNames{ outputName };
-
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        for (int i = 0; i < numTests; i++)
-        {
-            session.Run(Ort::RunOptions{ nullptr }, 
-                inputNames.data(), inputTensors.data(), 1, 
-                outputNames.data(), outputTensors.data(), 1);
-        }
-        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        int minimumInferenceLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
-        return minimumInferenceLatency_ms;
-    }
-
-private:
-    std::string labelFilepath{ "assets/Labels.txt" };
-#ifdef _WIN32
-    const wchar_t* modelFilepath = L"assets/SqueezeNet.onnx";//ORTCHAR_T*
-#else
-    const char* modelFilepath = "assets/SqueezeNet.onnx";
-#endif
-
-    Ort::Env env;
-    //Ort::Env env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "InferencePipeline");
-    Ort::AllocatorWithDefaultOptions allocator;
-    Ort::SessionOptions session_options = Ort::SessionOptions();
-    Ort::Session session{ env, modelFilepath, session_options };
-    std::vector<std::string> labels{ loadLabels(labelFilepath) };
-
-    // Define Input/Output (name, tensors, dim) 
-    size_t numInputNodes = session.GetInputCount();
-    const char* inputName = session.GetInputName(0, allocator);
-    Ort::TypeInfo inputTypeInfo = session.GetInputTypeInfo(0);
-    Ort::TensorTypeAndShapeInfo inputTensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
-    ONNXTensorElementDataType inputType = inputTensorInfo.GetElementType();
-    std::vector<int64_t> inputDims = inputTensorInfo.GetShape();
-    size_t inputTensorSize = vectorProduct(inputDims);
-
-    size_t numOutputNodes = session.GetOutputCount();
-    const char* outputName = session.GetOutputName(0, allocator);
-    Ort::TypeInfo outputTypeInfo = session.GetOutputTypeInfo(0);
-    Ort::TensorTypeAndShapeInfo outputTensorInfo = outputTypeInfo.GetTensorTypeAndShapeInfo();
-    ONNXTensorElementDataType outputType = outputTensorInfo.GetElementType();
-    std::vector<int64_t> outputDims = outputTensorInfo.GetShape();
-    size_t outputTensorSize = vectorProduct(outputDims);
-
-    std::vector<Ort::Value> inputTensors;
-    std::vector<Ort::Value> outputTensors;
-
-    Mat frame;
-    VideoCapture capture;
-    String window_name = "Camera Feed";
-
-public:
-    std::vector<float> inputTensorValues = std::vector<float>(inputTensorSize);
-    std::vector<float> outputTensorValues = std::vector<float>(outputTensorSize);
-    std::tuple<std::string, float> result = std::tuple<std::string, float>("Unknown", 0.0f);
 
 };
-
-std::unique_ptr<SqueezeNet> squeezeNet;
-
-
-
 

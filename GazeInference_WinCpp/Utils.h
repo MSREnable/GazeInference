@@ -1,4 +1,6 @@
 #include "framework.h"
+#include "cv_constants.h"
+#include <string>
 
 
 template <typename T>
@@ -15,12 +17,21 @@ static void softmax(T& input) {
 }
 
 
-template <typename T>
-T vectorProduct(const std::vector<T>& v)
-{
-    return accumulate(v.begin(), v.end(), 1, std::multiplies<T>());
-}
+//template <typename T>
+//T vectorProduct(const std::vector<T>& v)
+//{
+//    return accumulate(v.begin(), v.end(), 1, std::multiplies<T>());
+//}
 
+
+//template <class T> void SafeRelease(T** ppT)
+//{
+//    if (*ppT)
+//    {
+//        (*ppT)->Release();
+//        *ppT = NULL;
+//    }
+//}
 
 //byte[][] getMultiChannelArray(Mat m) {
 //    //first index is pixel, second index is channel
@@ -78,30 +89,7 @@ std::vector<std::string> readLabels(std::string& labelFilepath)
     return labels;
 }
 
-std::vector<std::string> loadLabels(std::string labelFilepath)
-{
-    std::vector<std::string> labels;
-    // Parse labels from labels file.  We know the file's entries are already sorted in order.
-    std::ifstream labelFile{ labelFilepath, std::ifstream::in };
-    if (labelFile.fail())
-    {
-        printf("failed to load the %s file.  Make sure it exists in the same folder as the app\r\n", labelFilepath.c_str());
-        exit(EXIT_FAILURE);
-    }
 
-    std::string line;
-    while (std::getline(labelFile, line, ','))
-    {
-        int labelValue = atoi(line.c_str());
-        if (labelValue >= labels.size())
-        {
-            labels.resize(labelValue + 1);
-        }
-        std::getline(labelFile, line);
-        labels[labelValue] = line;
-    }
-    return labels;
-}
 
 //void Run_with_WebCAM() {
 //    std::string WindowName = "WebCam_Example";
@@ -136,10 +124,10 @@ std::vector<std::string> loadLabels(std::string labelFilepath)
 
 
 void liveCameraFeed() {
-    Mat frame;
+    cv::Mat frame;
 
     // open camera for video stream
-    VideoCapture capture = VideoCapture(0);
+    cv::VideoCapture capture = cv::VideoCapture(0);
     //// open a video file for capture
     //VideoCapture capture("D:/My OpenCV Website/A Herd of Deer Running.mp4");
 
@@ -147,16 +135,16 @@ void liveCameraFeed() {
     if (!capture.isOpened())
     {
         //"Cannot open the video camera" 
-        cin.get(); //wait for any key press
+        std::cin.get(); //wait for any key press
     }
 
     //get the frames rate of the video
-    double fps = capture.get(CAP_PROP_FPS);
-    double width = capture.get(CAP_PROP_FRAME_WIDTH);
-    double height = capture.get(CAP_PROP_FRAME_HEIGHT);
+    double fps = capture.get(cv::CAP_PROP_FPS);
+    double width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
+    double height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-    String window_name = "Camera Feed";
-    namedWindow(window_name, WINDOW_NORMAL); //create a window
+    cv::String window_name = "Camera Feed";
+    cv::namedWindow(window_name, cv::WINDOW_NORMAL); //create a window
 
     while (true)
     {
@@ -176,15 +164,107 @@ void liveCameraFeed() {
         //If the 'Esc' key is pressed, break the while loop.
         //If the any other key is pressed, continue the loop 
         //If any key is not pressed withing 10 ms, continue the loop
-        if (waitKey(10) == 27)
+        if (cv::waitKey(10) == 27)
         {
-            cout << "Esc key is pressed by user. Stoppig the video" << endl;
+            std::cout << "Esc key is pressed by user. Stoppig the video" << std::endl;
             break;
         }
     }
 }
 
 
-void readImage(string imageFilePath) {
-    Mat image = imread(imageFilePath);
+void readImage(std::string imageFilePath) {
+    cv::Mat image = cv::imread(imageFilePath);
 }
+
+
+void playVideoFile_smartPointers(void) {
+    // Initialize the COM library.      
+    HRESULT hr = CoInitialize(NULL);
+    if (FAILED(hr))
+    {
+        LOG_ERROR("Could not initialize the COM library.\n");
+        return;
+    }
+    {
+        // Scope for smart pointers.          
+        // Create the Filter Graph Manager.          
+        CComPtr<IGraphBuilder> pGraph;
+        hr = pGraph.CoCreateInstance(CLSID_FilterGraph);
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Could not create the Filter Graph Manager.\n");
+            return;
+        }
+        // Query for interfaces.          
+        CComQIPtr<IMediaControl> pControl(pGraph);
+        CComQIPtr<IMediaEventEx> pEvent(pGraph);
+        // Build the graph. (Make sure to use a real file name!)          
+        hr = pGraph->RenderFile(L"assets/Example.avi", NULL);
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Could not build the graph.\n");
+            return;
+        }
+        // Run the graph.          
+        hr = pControl->Run();
+        if (FAILED(hr))
+        {
+            LOG_ERROR("Could not build the graph.\n");
+            return;
+        }
+        // Wait for playback to complete.          
+        long evCode;
+        pEvent->WaitForCompletion(INFINITE, &evCode);
+    }
+    CoUninitialize();
+}
+
+void playVideo(void)
+{
+    IGraphBuilder* pGraph = NULL;
+    IMediaControl* pControl = NULL;
+    IMediaEvent* pEvent = NULL;
+
+    // Initialize the COM library.
+    HRESULT hr = CoInitialize(NULL);
+    if (FAILED(hr))
+    {
+        LOG_ERROR("ERROR - Could not initialize COM library.\n");
+        return;
+    }
+
+    // Create the filter graph manager and query for interfaces.
+    hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER,
+        IID_IGraphBuilder, (void**)&pGraph);
+    if (FAILED(hr))
+    {
+        LOG_ERROR("ERROR - Could not create the Filter Graph Manager.\n");
+        return;
+    }
+
+    hr = pGraph->QueryInterface(IID_IMediaControl, (void**)&pControl);
+    hr = pGraph->QueryInterface(IID_IMediaEvent, (void**)&pEvent);
+
+    // Build the graph. IMPORTANT: Change this string to a file on your system.
+    hr = pGraph->RenderFile(L"assets/Example.avi", NULL);
+    if (SUCCEEDED(hr))
+    {
+        // Run the graph.
+        hr = pControl->Run();
+        if (SUCCEEDED(hr))
+        {
+            // Wait for completion.
+            long evCode;
+            pEvent->WaitForCompletion(INFINITE, &evCode);
+
+            // Note: Do not use INFINITE in a real application, because it
+            // can block indefinitely.
+        }
+    }
+    pControl->Release();
+    pEvent->Release();
+    pGraph->Release();
+    CoUninitialize();
+}
+

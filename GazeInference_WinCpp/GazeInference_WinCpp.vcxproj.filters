@@ -36,15 +36,45 @@
     <ClInclude Include="mnist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="squeezenet.h">
+    <ClInclude Include="logging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Preview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameCapture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cv_constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlibFaceDetector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ITrackerModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LiveCapture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SqueezeNet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UltraFaceNet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GazeInference_WinCpp_MNIST.cpp">
+    <ClCompile Include="GazeInference_WinCpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GazeInference_WinCpp.cpp">
+    <ClCompile Include="Preview.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameCapture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,6 +93,21 @@
     <Image Include="assets\kitten_224.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\sample.bmp">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\00000_Face.jpg">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\00000_Grid.jpg">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\00000_LeftEye.jpg">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\00000_RightEye.jpg">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\libraries\onnxruntime.dll" />
@@ -72,10 +117,45 @@
     <None Include="assets\SqueezeNet.onnx">
       <Filter>assets</Filter>
     </None>
+    <None Include="assets\Example.avi">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\shape_predictor_68_face_landmarks.dat">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\itracker.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\itracker_old.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\libraries\dlib.pdb" />
+    <None Include="assets\version-RFB-320.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\version-RFB-320_simplified.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\version-RFB-320_without_postprocessing.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\version-RFB-640.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\version-slim-320.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\version-slim-320_simplified.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\version-slim-320_without_postprocessing.onnx">
+      <Filter>assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\libraries\onnxruntime.lib" />
     <Library Include="..\libraries\opencv_world451d.lib" />
+    <Library Include="..\libraries\dlib19.21.0_debug_64bit_msvc1928.lib" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="assets\Labels.txt">
