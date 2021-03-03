@@ -225,6 +225,10 @@ public:
         return capture.read(frame); // read a new frame from video 
     }
 
+    double getPropertyValue(cv::VideoCaptureProperties property) {
+        return capture.get(property);
+    }
+
     //cv::Mat getCameraFrameMat() {
     //    cv::Mat frame1;
     //    capture.read(frame1);

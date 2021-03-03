@@ -97,7 +97,7 @@ private:
         size_t numOutputNodes = session.GetOutputCount();
         for (int i = 0; i < numOutputNodes; i++) {
             // Retrieve Output Tensor Info
-            Ort::TypeInfo outputTypeInfo = session.GetOutputTypeInfo(0);
+            Ort::TypeInfo outputTypeInfo = session.GetOutputTypeInfo(i);
             Ort::TensorTypeAndShapeInfo outputTensorInfo = outputTypeInfo.GetTensorTypeAndShapeInfo();
             ONNXTensorElementDataType outputType = outputTensorInfo.GetElementType();
             std::vector<int64_t> outputDims = outputTensorInfo.GetShape();

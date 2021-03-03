@@ -12,6 +12,11 @@ private:
     std::tuple<std::string, float> result = std::tuple<std::string, float>("Unknown", 0.0f);
     std::unique_ptr<LiveCapture> live_capture;
     std::unique_ptr<DlibFaceDetector> detector;
+
+    std::chrono::steady_clock::time_point epoch;
+    double timestamp_ms = -1;
+    int frame_count = 0;
+
 public:
     ITrackerModel(const wchar_t* modelFilePath) 
         : Model{ modelFilePath }
@@ -23,12 +28,17 @@ public:
         // Cleanup 
     }
 
-    bool init() {
+    bool initCamera() {
+
+        // Initialize face ROI/landmark detector
+        detector = std::make_unique<DlibFaceDetector>();
+        
+        // Initialize live capture
         live_capture = std::make_unique<LiveCapture>();
         live_capture->open();
 
-        detector = std::make_unique<DlibFaceDetector>();
-        return (detector && live_capture);
+        
+        return ( live_capture && detector);
     }
 
     bool getFrameFromImagePath(std::string imageFilepath) {
@@ -36,7 +46,18 @@ public:
     }
 
     bool getFrame() {
-        return live_capture->getFrame(frame);
+        if (frame_count == 0)
+            epoch = std::chrono::steady_clock::now();
+
+        bool status = live_capture->getFrame(frame);
+
+        // calculate timing properties
+        frame_count++;
+        timestamp_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - epoch).count();
+
+        LOG_DEBUG("%d | %f | %f \n", frame_count, timestamp_ms, (1000 * frame_count)/ timestamp_ms);
+        
+        return status;
     }
 
     void showRawInput() {
@@ -70,11 +91,6 @@ public:
     }
 
     int benchmark() {
-        const wchar_t* modelFilepath = L"assets/itracker.onnx";
-        //const wchar_t* labelFilepath = NULL;
-        std::unique_ptr<ITrackerModel> model = std::make_unique<ITrackerModel>(modelFilepath);
-        model->init();
-        //model->initCamera();
         cv::Mat frame;
         std::vector<cv::Mat> roi_images;
         std::vector<float> coordinates_XY;
@@ -85,15 +101,15 @@ public:
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         for (int i = 0; i < numTests; i++)
         {
-            is_valid = model->getFrame(); //reads a new frame
+            is_valid = getFrame(); //reads a new frame
             if (!is_valid)
                 continue;
-            is_valid = model->applyTransformations();
+            is_valid = applyTransformations();
             if (!is_valid)
                 continue;
-            model->fillInputTensor();
-            model->run();
-            coordinates_XY = model->processOutput();
+            fillInputTensor();
+            run();
+            coordinates_XY = processOutput();
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         int avgLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
@@ -101,10 +117,6 @@ public:
     }
 
     int benchmark2() {
-        const wchar_t* modelFilepath = L"assets/itracker.onnx";
-        //const wchar_t* labelFilepath = NULL;
-        std::unique_ptr<ITrackerModel> model = std::make_unique<ITrackerModel>(modelFilepath);
-        model->init();
         cv::Mat frame;
         std::vector<cv::Mat> roi_images;
         std::vector<float> coordinates_XY;
@@ -119,7 +131,7 @@ public:
         begin = std::chrono::steady_clock::now();
         for (int i = 0; i < numTests; i++)
         {
-            is_valid = model->getFrame(); //reads a new frame
+            is_valid = getFrame(); //reads a new frame
         }
         end = std::chrono::steady_clock::now();
         int avgFrameLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
@@ -128,7 +140,7 @@ public:
         begin = std::chrono::steady_clock::now();
         for (int i = 0; i < numTests; i++)
         {
-            is_valid = model->applyTransformations();
+            is_valid = applyTransformations();
         }
         end = std::chrono::steady_clock::now();
         int avgApplyTransformationsLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
@@ -137,7 +149,7 @@ public:
         begin = std::chrono::steady_clock::now();
         for (int i = 0; i < numTests; i++)
         {
-            model->fillInputTensor();
+            fillInputTensor();
         }
         end = std::chrono::steady_clock::now();
         int avgFillInputTensorLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
@@ -145,7 +157,7 @@ public:
         begin = std::chrono::steady_clock::now();
         for (int i = 0; i < numTests; i++)
         {
-            model->run();
+            run();
         }
         end = std::chrono::steady_clock::now();
         int avgModelLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
@@ -153,7 +165,7 @@ public:
         begin = std::chrono::steady_clock::now();
         for (int i = 0; i < numTests; i++)
         {
-            coordinates_XY = model->processOutput();
+            coordinates_XY = processOutput();
         }
         end = std::chrono::steady_clock::now();
         int avgProcessOutputLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
@@ -169,11 +181,6 @@ public:
     }
 
     int benchmark_dlib() {
-        const wchar_t* modelFilepath = L"assets/itracker.onnx";
-        //const wchar_t* labelFilepath = NULL;
-        std::unique_ptr<ITrackerModel> model = std::make_unique<ITrackerModel>(modelFilepath);
-        //model->initDetector();
-        model->init();
         std::vector<cv::Mat> roi_images;
         bool is_valid;
         std::vector<cv::Point2f> face_shape_vector;
@@ -186,7 +193,7 @@ public:
 
 
         // Load frame
-        model->getFrame(); //reads a new frame model->frame
+        getFrame(); //reads a new frame model->frame
         
 
         // Init dlib
@@ -207,7 +214,7 @@ public:
         begin = std::chrono::steady_clock::now();
         for (int i = 0; i < numTests; i++)
         {
-            is_valid = detector->find_primary_face(model->frame, face_shape_vector, model->live_capture->downscaling);
+            is_valid = detector->find_primary_face_ultraFace(frame, face_shape_vector, live_capture->downscaling);
         }
         end = std::chrono::steady_clock::now();
         int avgFaceDetectionLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
@@ -241,14 +248,6 @@ public:
 
         return avgLatency_ms;
     }
-
-    int benchmark_ultraLight() {
-        const wchar_t* modelFilepath = L"assets/version-RFB-320.onnx";
-        //const wchar_t* labelFilepath = NULL;
-        std::unique_ptr<Model> model_faceDetection = std::make_unique<Model>(modelFilepath);
-        return 0;
-    }
-
 
 };
 

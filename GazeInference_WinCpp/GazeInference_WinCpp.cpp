@@ -272,8 +272,8 @@ void OnPaint(HWND hWnd)
 	//	squeezeNet->processOutput(true);
 	//}
 
-	// Ex.4: Working iTracker model inference to generate (x,y) coordinates
-	model->init();
+	//// Ex.3: Working iTracker model inference to generate (x,y) coordinates
+	model->initCamera();
 	cv::Mat frame;
 	std::vector<cv::Mat> roi_images;
 	std::vector<float> coordinates_XY;
@@ -288,13 +288,14 @@ void OnPaint(HWND hWnd)
 		coordinates_XY = model->processOutput();
 	}
 
+	//model->initCamera();
 	//model->benchmark2();
 	//model->benchmark_dlib();
-	//model->benchmark_ultraLight();
 
-	//std::unique_ptr<UltraFaceNet> ultraFaceNet = std::make_unique<UltraFaceNet>(L"assets/version-RFB-320.onnx");
-	//ultraFaceNet->init();
-	//while (ultraFaceNet->getCameraFrame()) {
+	//std::unique_ptr<UltraFaceNet> ultraFaceNet = std::make_unique<UltraFaceNet>(L"assets/version-RFB-320_without_postprocessing.onnx");
+	//std::unique_ptr<UltraFaceNet> ultraFaceNet = std::make_unique<UltraFaceNet>(L"assets/version-slim-320_without_postprocessing.onnx");
+	//ultraFaceNet->initCamera();
+	//while (ultraFaceNet->getFrame()) {
 	//	ultraFaceNet->applyTransformations();
 	//	ultraFaceNet->fillInputTensor();
 	//	ultraFaceNet->run();
