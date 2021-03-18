@@ -59,7 +59,7 @@ private:
     const int SKIP_FRAMES = 1;
     const int blurring = BLURRING::HIGH;
     
-    int detector_type = DETECTOR_TYPE::ULTRA_FACE;//DETECTOR_TYPE::ULTRA_FACE_SLIM
+    int detector_type = DETECTOR_TYPE::ULTRA_FACE_SLIM;//ULTRA_FACE_SLIM, ULTRA_FACE
     int frame_count = 0;
     std::vector<dlib::rectangle> face_rectangles;
     std::unique_ptr<UltraFaceNet> ultraFaceNet;
@@ -76,6 +76,10 @@ public:
             ultraFaceNet = std::make_unique<UltraFaceNet>(L"assets/version-slim-320_without_postprocessing.onnx");
             
         // initialize landmark detector
+        std::async(&DlibFaceDetector::init_predictor, this);
+    }
+
+    void init_predictor() {
         dlib::deserialize(predictor_model_path) >> predictor;
     }
 
@@ -132,6 +136,8 @@ public:
         return is_valid;
     }
 
+    // https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB
+    // inputImage is BGR
     bool find_primary_face_ultraFace(cv::Mat inputImage, std::vector<cv::Point2f>& landmarks, cv::Size downscaling) {
         bool is_valid = false;
 
@@ -140,18 +146,19 @@ public:
             LOG_ERROR("Image is empty.");
         }
 
-        // Convert mat to dlib's image format
-        dlib::cv_image<dlib::bgr_pixel> inputImage_dlib(inputImage);
-
+        cv::Mat inputImageRGB;
+        cv::cvtColor(inputImage, inputImageRGB, cv::ColorConversionCodes::COLOR_BGR2RGB);
         // Detect faces in every Kth (SKIP_FRAMES) frames
         if (frame_count % SKIP_FRAMES == 0)
         {
             // image Resize is handled by ultraface internally 
-            face_rectangles = ultraFaceNet->detect_faces(inputImage);
+            face_rectangles = ultraFaceNet->detect_faces(inputImageRGB);
             //frame_count = 0; //reset frame count 
         }
         frame_count++;
 
+        // Convert mat to dlib's image format
+        dlib::cv_image<dlib::bgr_pixel> inputImage_dlib(inputImage);
         dlib::full_object_detection shape;
         if (face_rectangles.size() == 1) {
             is_valid = true;
@@ -390,15 +397,28 @@ public:
         cv::bitwise_or(webcamImage, blurMask, webcamImage);
     }
 
+    cv::Mat cvtColor_BRG2YCbCr(cv::Mat inputImageBGR) {
+        cv::Mat inputImageYCrCb, inputImageYCbCr;
+        cv::cvtColor(inputImageBGR, inputImageYCrCb, cv::ColorConversionCodes::COLOR_BGR2YCrCb);
+        cv::Mat channels[3];
+        cv::split(inputImageYCrCb, channels);
+        std::swap(channels[1], channels[2]);
+        cv::merge(channels, 3, inputImageYCbCr);
+        return inputImageYCbCr;
+    }
+
     void generate_face_eye_images(cv::Mat webcam_image, std::vector<cv::RotatedRect> rectangles, std::vector<cv::Mat>& roi_images) {
         cv::RotatedRect face_rect = rectangles[0];
         cv::RotatedRect left_eye_rect = rectangles[1];
         cv::RotatedRect right_eye_rect = rectangles[2];
 
-        cv::Mat face_image = crop_rect(webcam_image, face_rect);
-        cv::Mat left_eye_image = crop_rect(webcam_image, left_eye_rect);
-        cv::Mat right_eye_image = crop_rect(webcam_image, right_eye_rect);
-        cv::Mat face_grid_image = generate_grid(webcam_image.size(), face_rect);
+        // Convert to YCbCr
+        cv::Mat inputImageYCbCr = cvtColor_BRG2YCbCr(webcam_image);
+
+        cv::Mat face_image = crop_rect(inputImageYCbCr, face_rect);
+        cv::Mat left_eye_image = crop_rect(inputImageYCbCr, left_eye_rect);
+        cv::Mat right_eye_image = crop_rect(inputImageYCbCr, right_eye_rect);
+        cv::Mat face_grid_image = generate_grid(inputImageYCbCr.size(), face_rect);
 
         roi_images.clear();
         roi_images.push_back(face_image);
@@ -418,6 +438,9 @@ public:
         cv::RotatedRect face_rect = rectangles[0];
         cv::RotatedRect left_eye_rect = rectangles[1];//relative to face_rect
         cv::RotatedRect right_eye_rect = rectangles[2];//relative to face_rect
+
+        // Convert to YCbCr
+        face_image = cvtColor_BRG2YCbCr(face_image);
 
         cv::Mat left_eye_image = crop_rect(face_image, left_eye_rect);//relative to face_rect
         cv::Mat right_eye_image = crop_rect(face_image, right_eye_rect);//relative to face_rect
@@ -570,28 +593,32 @@ public:
         else
             is_valid = find_primary_face_ultraFace(webcamImage, face_shape_vector, downscaling);
 
+        //if (is_valid) {
+        //    is_valid = landmarksToRects(face_shape_vector, rectangles);
+        //    if (is_valid) {
+        //        generate_face_eye_images(webcamImage, rectangles, roi_images);
+        //        resize_ROI_images(roi_images);
+        //        show_ROI_extraction(webcamImage, face_shape_vector, rectangles, roi_images);
+        //    }
+        //}
+
+        // For edge devices
         if (is_valid) {
-            is_valid = landmarksToRects(face_shape_vector, rectangles);
+            is_valid = landmarksToRectsEDGE(face_shape_vector, rectangles);
             if (is_valid) {
-                generate_face_eye_images(webcamImage, rectangles, roi_images);
+                // At edge device
+                cv::Mat face_image = generate_face_image_EDGE(webcamImage, rectangles);
+                // At compute device - input {webcamImage.size(), face_image (original size), rectangles}
+                generate_face_eye_images_COMPUTE(webcamImage.size(), face_image, rectangles, roi_images);
                 resize_ROI_images(roi_images);
-                show_ROI_extraction(webcamImage, face_shape_vector, rectangles, roi_images);
+                privacy_mask(webcamImage, rectangles[0]);
+                show_ROI_extraction_COMPUTE(webcamImage, face_shape_vector, rectangles, roi_images);
             }
         }
 
-        //// For edge devices
-        //if (is_valid) {
-        //    is_valid = landmarksToRectsEDGE(face_shape_vector, rectangles);
-        //    if (is_valid) {
-        //        // At edge device
-        //        cv::Mat face_image = generate_face_image_EDGE(webcamImage, rectangles);
-        //        // At compute device - input {webcamImage.size(), face_image (original size), rectangles}
-        //        generate_face_eye_images_COMPUTE(webcamImage.size(), face_image, rectangles, roi_images);
-        //        resize_ROI_images(roi_images);
-        //        privacy_mask(webcamImage, rectangles[0]);
-        //        show_ROI_extraction_COMPUTE(webcamImage, face_shape_vector, rectangles, roi_images);
-        //    }
-        //}
+        for (auto& image : roi_images) {
+            image.convertTo(image, CV_32FC3, 1.0 / 255.0);
+        }
 
         return roi_images;
     }

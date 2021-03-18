@@ -2,6 +2,12 @@
 #include "Model.h"
 #include "DlibFaceDetector.h"
 #include "LiveCapture.h"
+#include "EyeGazeIoctlLibrary.h"
+#pragma comment(lib, "EyeGazeIoctlLibrary.lib")
+#include "cam2screen.h"
+
+#include <chrono>
+#include <ctime>
 
 
 // ITracker Model
@@ -16,6 +22,12 @@ private:
     std::chrono::steady_clock::time_point epoch;
     double timestamp_ms = -1;
     int frame_count = 0;
+    std::thread frame_process_thread;
+    std::thread inference_thread;
+
+    FLOAT xMonitorRatio;
+    FLOAT yMonitorRatio;
+    POINT mousePoint;
 
 public:
     ITrackerModel(const wchar_t* modelFilePath) 
@@ -32,12 +44,20 @@ public:
 
         // Initialize face ROI/landmark detector
         detector = std::make_unique<DlibFaceDetector>();
+
+        InitializeEyeGaze();
         
         // Initialize live capture
         live_capture = std::make_unique<LiveCapture>();
         live_capture->open();
 
-        
+        RECT desktopRect;
+        HWND desktopHwnd = GetDesktopWindow();
+        GetWindowRect(desktopHwnd, &desktopRect);
+        // screen size to pixel ratio
+        xMonitorRatio = (FLOAT)GetPrimaryMonitorWidthUm() / (FLOAT)desktopRect.right;
+        yMonitorRatio = (FLOAT)GetPrimaryMonitorHeightUm() / (FLOAT)desktopRect.bottom;
+
         return ( live_capture && detector);
     }
 
@@ -66,6 +86,7 @@ public:
 
     bool applyTransformations() {
         // Apply ROI Extraction through dlib
+        // frame in BGR and roi_frames YCbCr
         std::vector<cv::Mat> roi_frames = detector->ROIExtraction(frame, live_capture->downscaling);
 
         if (roi_frames.size() != 4) {
@@ -87,7 +108,59 @@ public:
         float x = coordinates[0];
         float y = coordinates[1];
         LOG_DEBUG("x=%.2f, y=%.2f\n", x, y);
+
+
+        const auto p1 = std::chrono::system_clock::now();
+        long long timestamp_um_from_epoch = std::chrono::duration_cast<std::chrono::microseconds>(
+            p1.time_since_epoch()).count();
+
+        int xMouse;
+        int yMouse;
+        if (GetCursorPos(&mousePoint))
+        {
+            // mouse is returned in pixels, need to convert to um
+            xMouse = (INT32)(mousePoint.x * xMonitorRatio);
+            yMouse = (INT32)(mousePoint.y * yMonitorRatio);
+        }
+
+        cv::Point point = cam2screen(x, y,
+            GetPrimaryMonitorWidthUm(),
+            GetPrimaryMonitorHeightUm());
+        LOG_DEBUG("X=%d (%d), Y=%d (%d)\n", point.x, xMouse, point.y, yMouse);
+        SendGazeReportUm(point.x, point.y, timestamp_um_from_epoch);
+        //SendGazeReportUm(point.x, point.y, 0);
+
         return coordinates;
+    }
+
+    void processFrame() {
+        bool is_valid;
+        int i = 0;
+        while (true) { 
+            i++;
+            is_valid = getFrame(); //reads a new frame
+            if (!is_valid)
+                continue;
+            is_valid = applyTransformations();
+            if (!is_valid)
+                continue;
+            fillInputTensor();
+            run();
+            processOutput();
+        }
+    }
+
+    //void frameInference() {
+    //    while (true) {
+    //        fillInputTensor();
+    //        run();
+    //        processOutput();
+    //    }
+    //}
+
+    void runInference() {
+        frame_process_thread = std::thread(&ITrackerModel::processFrame, this);
+        //inference_thread = std::thread(&ITrackerModel::frameInference, this);
     }
 
     int benchmark() {

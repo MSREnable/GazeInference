@@ -30,7 +30,9 @@ FrameCapture* g_pFrameCapture = NULL;
 //const wchar_t* modelFilepath = L"assets/SqueezeNet.onnx";
 //const wchar_t* labelFilepath = L"assets/Labels.txt";
 
-const wchar_t* modelFilepath = L"assets/itracker.onnx";
+//const wchar_t* modelFilepath = L"assets/itracker.onnx";
+//const wchar_t* modelFilepath = L"assets/itracker_MSR_rc_1_0113.onnx";
+const wchar_t* modelFilepath = L"assets/itracker_MSR_rc_adam_0_9171.onnx";
 const wchar_t* labelFilepath = NULL;
 std::unique_ptr<ITrackerModel> model;
 
@@ -274,19 +276,21 @@ void OnPaint(HWND hWnd)
 
 	//// Ex.3: Working iTracker model inference to generate (x,y) coordinates
 	model->initCamera();
-	cv::Mat frame;
-	std::vector<cv::Mat> roi_images;
-	std::vector<float> coordinates_XY;
-	bool is_valid;
+	//cv::Mat frame;
+	//std::vector<cv::Mat> roi_images;
+	//std::vector<float> coordinates_XY;
+	//bool is_valid;
 
-	while (model->getFrame()) { //reads a new frame
-		is_valid = model->applyTransformations();
-		if (!is_valid)
-			continue;
-		model->fillInputTensor();
-		model->run();
-		coordinates_XY = model->processOutput();
-	}
+	//while (model->getFrame()) { //reads a new frame
+	//	is_valid = model->applyTransformations();
+	//	if (!is_valid)
+	//		continue;
+	//	model->fillInputTensor();
+	//	model->run();
+	//	coordinates_XY = model->processOutput();
+	//}
+
+	model->runInference();
 
 	//model->initCamera();
 	//model->benchmark2();

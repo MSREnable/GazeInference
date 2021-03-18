@@ -38,6 +38,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <strsafe.h>
+#include <thread>
+#include <future>
 
 
 // Headers for Media Foundation

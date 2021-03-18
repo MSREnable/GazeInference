@@ -69,6 +69,12 @@
     <ClInclude Include="Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LiveCapture_old.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cam2screen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GazeInference_WinCpp.cpp">
@@ -99,18 +105,6 @@
     <Image Include="assets\sample.bmp">
       <Filter>assets</Filter>
     </Image>
-    <Image Include="assets\00000_Face.jpg">
-      <Filter>assets</Filter>
-    </Image>
-    <Image Include="assets\00000_Grid.jpg">
-      <Filter>assets</Filter>
-    </Image>
-    <Image Include="assets\00000_LeftEye.jpg">
-      <Filter>assets</Filter>
-    </Image>
-    <Image Include="assets\00000_RightEye.jpg">
-      <Filter>assets</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\libraries\onnxruntime.dll" />
@@ -133,11 +127,24 @@
     <None Include="assets\version-slim-320_without_postprocessing.onnx">
       <Filter>assets</Filter>
     </None>
+    <None Include="packages.config" />
+    <None Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.pdb" />
+    <None Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.dll" />
+    <None Include="device_metrics_sku.json">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\itracker_MSR_rc_1_0113.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\itracker_MSR_rc_adam_0_9171.onnx">
+      <Filter>assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\libraries\onnxruntime.lib" />
     <Library Include="..\libraries\opencv_world451d.lib" />
     <Library Include="..\libraries\dlib19.21.0_debug_64bit_msvc1928.lib" />
+    <Library Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.lib" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="assets\Labels.txt">

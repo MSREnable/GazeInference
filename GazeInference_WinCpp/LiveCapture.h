@@ -1,9 +1,11 @@
 #pragma once
 #include "framework.h"
 #include "cv_constants.h"
+#include <queue>
 
 
-// ITracker Model
+enum STATE { DORMANT, RUNNING};
+
 class LiveCapture
 {
 private:
@@ -11,6 +13,11 @@ private:
     int CAPTURE_DEVICE_ID = 0; // Front camera
     int FRAME_RATE = 30;
     cv::Size RESOLUTION = cv::Size(1280, 720);
+    const int buffer_length = 3;
+    std::queue<cv::Mat> frame_queue = std::queue<cv::Mat>();
+    std::thread frame_grabber_thread;
+    int state = STATE::DORMANT;
+    
 
     const std::vector<cv::Size> CommonResolutions = {
         cv::Size(320, 240),
@@ -32,7 +39,7 @@ public:
 public:
     LiveCapture()
     {
-
+    
     }
 
     LiveCapture(int capture_device_id, int frame_rate, cv::Size resolution)
@@ -178,15 +185,21 @@ public:
             set_resolution(RESOLUTION);
             set_frame_rate(FRAME_RATE);
             //cv::namedWindow(window_name, cv::WINDOW_NORMAL); //create a window
+
+            // initialize the frame_grabber_thread
+            frame_grabber_thread = std::thread(&LiveCapture::grabFrame, this);
         }
     }
 
     void close() {
+        state = STATE::DORMANT;
+        frame_grabber_thread.join();
         capture.release();
     }
 
     bool is_open() {
         return capture.isOpened();
+        //return capture.isOpened() && state == STATE::RUNNING;
     }
 
 
@@ -222,23 +235,38 @@ public:
     }
 
     bool getFrame(cv::Mat& frame) {
-        return capture.read(frame); // read a new frame from video 
+        //return capture.read(frame); // read a new frame from video 
+        if (frame_queue.size() > 0) {
+            frame = frame_queue.front();
+            frame_queue.pop();
+            return (!frame.empty());
+        }
+        else {
+            return false;
+        }
+        
+    }
+
+    void grabFrame() {
+        cv::Mat frame;
+        state = STATE::RUNNING;
+        // to stop the thread state could be set DORMANT outside
+        while (state == STATE::RUNNING) {
+            capture.read(frame);
+            // If queue is full remove a frame from the front
+            if (frame_queue.size() == buffer_length) {
+                frame_queue.pop();
+            }
+
+            // push at the back of the queue
+            frame_queue.push(frame);
+            //LOG_DEBUG("Queue: %d\n", frame_queue.size());
+        }
     }
 
     double getPropertyValue(cv::VideoCaptureProperties property) {
         return capture.get(property);
     }
-
-    //cv::Mat getCameraFrameMat() {
-    //    cv::Mat frame1;
-    //    capture.read(frame1);
-    //    return frame1;
-    //}
-
-    //cv::Mat getFrameFromImagePathMat(std::string imageFilepath) {
-    //    return cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
-    //}
-
 
     void showRawInput(cv::Mat frame) {
         //show the frame in the created window
