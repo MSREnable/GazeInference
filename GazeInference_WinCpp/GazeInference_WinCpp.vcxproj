@@ -177,9 +177,6 @@
     <Image Include="assets\kitten_224.png">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
     </Image>
-    <Image Include="assets\sample.bmp">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Image>
     <Image Include="GazeInference_WinCpp.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
