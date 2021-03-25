@@ -174,9 +174,6 @@
     <ResourceCompile Include="GazeInference_WinCpp.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\kitten_224.png">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Image>
     <Image Include="GazeInference_WinCpp.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
