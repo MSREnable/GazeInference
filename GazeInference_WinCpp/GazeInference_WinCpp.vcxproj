@@ -265,7 +265,7 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='DML|x64'">true</DeploymentContent>
     </None>
     <None Include="..\libraries\Release\opencv_world451.dll">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='DML|x64'">true</DeploymentContent>
     </None>
     <None Include="assets\best_checkpoint_MSR_0_78636.onnx">

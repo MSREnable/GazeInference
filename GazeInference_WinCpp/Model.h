@@ -61,7 +61,6 @@ public:
 
 private:
     void enable_hardware_acceleration(OrtSessionOptions* session_options) {
-        ORT_ABORT_ON_ERROR(OrtSessionOptionsAppendExecutionProvider_DML(session_options, 0));
 #if defined(USE_CUDA)
         ORT_ABORT_ON_ERROR(OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, 0));
 #elif defined(USE_DML)

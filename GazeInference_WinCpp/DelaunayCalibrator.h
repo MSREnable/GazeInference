@@ -19,30 +19,44 @@ void extend(std::vector<T>& vector1, std::vector<T>& vector2) {
 class DelaunayCalibrator {
 private:
     cv::Rect rect;
+    cv::Rect img_rect;
     std::vector<cv::Point2f> actual_coordinates;
     std::vector<cv::Point2f> predicted_coordinates;
     cv::Subdiv2D actualMesh;
     cv::Subdiv2D predictedMesh;
     bool status;
-    float margin = 0.25;
+    float margin = 0.10;
+    float ratio;
+    int img_width = 600;
     cv::Point2f orig;
     std::vector<cv::Point2f> default_coordinates;
 
 public:
-    DelaunayCalibrator(cv::Rect rect, std::vector<cv::Point2f> actual_coordinates, std::vector<cv::Point2f> predicted_coordinates) {
-        initDelaunaySpace(rect);
-        actual_coordinates = InputToDelaunay(actual_coordinates);
-        predicted_coordinates = InputToDelaunay(predicted_coordinates);
+    //DelaunayCalibrator(cv::Rect rect, std::vector<cv::Point2f> actual_coordinates, std::vector<cv::Point2f> predicted_coordinates) {
+    //    initDelaunaySpace(rect, this->margin);
+    //    actual_coordinates = InputToDelaunay(actual_coordinates);
+    //    predicted_coordinates = InputToDelaunay(predicted_coordinates);
 
-        extend(actual_coordinates, this->default_coordinates);
-        extend(predicted_coordinates, this->default_coordinates);
+    //    extend(actual_coordinates, this->default_coordinates);
+    //    extend(predicted_coordinates, this->default_coordinates);
+
+    //    // Apply rect to limit the coordinates
+    //    this->actual_coordinates = limitXY(actual_coordinates);
+    //    this->predicted_coordinates = limitXY(predicted_coordinates);
+
+    //    this->actualMesh = createDelaunayMesh(limitXY(this->actual_coordinates));
+    //    this->predictedMesh = createDelaunayMesh(limitXY(this->predicted_coordinates));
+    //}
+
+    DelaunayCalibrator(cv::Rect rect, std::vector<cv::Point2f> actual_coordinates, std::vector<cv::Point2f> predicted_coordinates) {
+        initDelaunaySpace(rect, this->margin);
 
         // Apply rect to limit the coordinates
-        this->actual_coordinates = limitXY(actual_coordinates);
-        this->predicted_coordinates = limitXY(predicted_coordinates);
+        this->actual_coordinates = std::vector<cv::Point2f>();
+        this->predicted_coordinates = std::vector<cv::Point2f>();
 
-        this->actualMesh = createDelaunayMesh(limitXY(this->actual_coordinates));
-        this->predictedMesh = createDelaunayMesh(limitXY(this->predicted_coordinates));
+        this->actualMesh = cv::Subdiv2D(this->rect);
+        this->predictedMesh = cv::Subdiv2D(this->rect);
     }
 
     void initDelaunaySpace(cv::Rect rect, float margin=0.50) {
@@ -57,6 +71,8 @@ public:
                                         cv::Point2f(0, this->rect.height)
 
         };
+        this->ratio = (float)this->img_width / this->rect.width;
+        this->img_rect = cv::Rect(0, 0, this->rect.width * ratio, this->rect.height * ratio);
     }
 
     std::vector<cv::Point2f> InputToDelaunay(std::vector<cv::Point2f> in_vector) {
@@ -134,26 +150,32 @@ public:
     }
 
     cv::Point2f calibrate(cv::Point2f searchPoint) {
-        // Map to Delaunay space
-        searchPoint = InputToDelaunay(searchPoint);
-        cv::Vec6f t = findTriangle(searchPoint, this->predictedMesh);
+        if (this->actual_coordinates.size() > 3) {
+            // Map to Delaunay space
+            searchPoint = InputToDelaunay(searchPoint);
+            cv::Vec6f t = findTriangle(searchPoint, this->predictedMesh);
 
-        std::vector<cv::Point2f> predicted_vertices = getTriangleVertices(t);
-        std::vector<int> predicted_vertices_indices = findIndices(this->predicted_coordinates, predicted_vertices);
-        std::vector<cv::Point2f> actual_vertices = selectIndices(this->actual_coordinates, predicted_vertices_indices);
-        cv::Mat M = cv::getAffineTransform(predicted_vertices, actual_vertices);
+            std::vector<cv::Point2f> predicted_vertices = getTriangleVertices(t);
+            std::vector<int> predicted_vertices_indices = findIndices(this->predicted_coordinates, predicted_vertices);
+            std::vector<cv::Point2f> actual_vertices = selectIndices(this->actual_coordinates, predicted_vertices_indices);
+            cv::Mat M = cv::getAffineTransform(predicted_vertices, actual_vertices);
 
-        std::vector<cv::Point2f> calibrated_vector;
-        cv::transform(std::vector<cv::Point2f>{ searchPoint }, calibrated_vector, M);
-        LOG_DEBUG("########## %d ###########", this->actual_coordinates.size());
-        return DelaunayToInput(calibrated_vector[0]);
+            std::vector<cv::Point2f> calibrated_vector;
+            cv::transform(std::vector<cv::Point2f>{ searchPoint }, calibrated_vector, M);
+            LOG_DEBUG("########## %d ###########", this->actual_coordinates.size());
+            return DelaunayToInput(calibrated_vector[0]);
+        }
+        else {
+            return searchPoint;
+        }
+        
     }
 
-    std::vector<cv::Point2f> getTriangleVertices(cv::Vec6f &triangle) {
+    std::vector<cv::Point2f> getTriangleVertices(cv::Vec6f &triangle, float ratio=1.0f) {
         std::vector<cv::Point2f> vertices(3);
         // Create vector of vertices
         for (int i = 0; i < vertices.size(); i++) {
-            vertices[i] = cv::Point2f(triangle[2 * i], triangle[2 * i + 1]);
+            vertices[i] = cv::Point2f(triangle[2 * i] * ratio, triangle[2 * i + 1] * ratio);
         }
         return vertices;
     }
@@ -242,17 +264,14 @@ public:
 
     // Fix problem with img creation
     void drawDelaunayMap(){
-        // Display Distortion Map
-        int W = this->rect.width;
-        int H = this->rect.height;
-
-        cv::Mat img = cv::Mat(cv::Size(this->rect.width, this->rect.height), CV_32FC3);
+        // Keep the image size small
+        cv::Mat img(img_rect.size(), CV_8UC3);
+        img = cv::Scalar::all(0);
+        //cv::Mat img = cv::Mat(cv::Size(this->rect.width, this->rect.height), CV_32FC3);
         drawDelaunay(img, this->actualMesh, cv::Scalar(0, 255, 0) /*Green*/);
         drawDelaunay(img, this->predictedMesh, cv::Scalar(255, 0, 0)/*Blue*/);
         cv::imshow("DelaunayDistortionMap", img);
         cv::waitKey(1);
-        LOG_DEBUG("##############################")
-        //cv::imwrite('denaunay.png', img);
     }
 
     // Draw delaunay triangles
@@ -266,21 +285,21 @@ public:
 
     // Draw a triangle
     void drawTriangle(cv::Mat img, cv::Vec6f t, cv::Scalar color) {
-        std::vector<cv::Point2f> vertices = getTriangleVertices(t);
+        std::vector<cv::Point2f> vertices = getTriangleVertices(t, this->ratio);
         if (rect_contains(vertices[0]) && rect_contains(vertices[0]) && rect_contains(vertices[2])) {
-            cv::circle(img, vertices[0], 10, color, -1);
-            cv::circle(img, vertices[1], 10, color, -1);
-            cv::circle(img, vertices[2], 10, color, -1);
-            cv::line(img, vertices[0], vertices[1], color, 2, cv::LINE_AA, 0);
-            cv::line(img, vertices[1], vertices[2], color, 2, cv::LINE_AA, 0);
-            cv::line(img, vertices[2], vertices[0], color, 2, cv::LINE_AA, 0);
+            cv::circle(img, vertices[0], 2, color, -1);
+            cv::circle(img, vertices[1], 2, color, -1);
+            cv::circle(img, vertices[2], 2, color, -1);
+            cv::line(img, vertices[0], vertices[1], color, 1, cv::LINE_AA, 0);
+            cv::line(img, vertices[1], vertices[2], color, 1, cv::LINE_AA, 0);
+            cv::line(img, vertices[2], vertices[0], color, 1, cv::LINE_AA, 0);
         }
     }
 
     // Check if a point is inside the base rectangle
     bool rect_contains(cv::Point2f point) {
-        if (this->rect.x <= point.x && point.x <= this->rect.width && 
-            this->rect.y <= point.y && point.y <= this->rect.height) {
+        if (this->img_rect.x <= point.x && point.x <= this->img_rect.width &&
+            this->img_rect.y <= point.y && point.y <= this->img_rect.height) {
             return true;
         }
         else {
