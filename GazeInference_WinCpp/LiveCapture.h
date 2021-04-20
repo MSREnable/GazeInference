@@ -4,7 +4,7 @@
 #include <queue>
 
 
-enum STATE { DORMANT, RUNNING};
+enum STATE { DORMANT, RUNNING, INACTIVE};
 
 class LiveCapture
 {
@@ -16,7 +16,8 @@ private:
     const int buffer_length = 3;
     std::queue<cv::Mat> frame_queue = std::queue<cv::Mat>();
     std::thread frame_grabber_thread;
-    int state = STATE::DORMANT;
+    int state = STATE::INACTIVE;
+    //int state = STATE::DORMANT;
     
 
     const std::vector<cv::Size> CommonResolutions = {
@@ -186,14 +187,18 @@ public:
             set_frame_rate(FRAME_RATE);
             //cv::namedWindow(window_name, cv::WINDOW_NORMAL); //create a window
 
-            // initialize the frame_grabber_thread
-            frame_grabber_thread = std::thread(&LiveCapture::grabFrame, this);
+            if (state != STATE::INACTIVE) {
+                // initialize the frame_grabber_thread
+                frame_grabber_thread = std::thread(&LiveCapture::grabFrame, this);
+            }
         }
     }
 
     void close() {
-        state = STATE::DORMANT;
-        frame_grabber_thread.join();
+        if (state == STATE::RUNNING) {
+            state = STATE::DORMANT;
+            frame_grabber_thread.join();
+        }
         capture.release();
     }
 
@@ -235,16 +240,22 @@ public:
     }
 
     bool getFrame(cv::Mat& frame) {
-        //return capture.read(frame); // read a new frame from video 
-        if (frame_queue.size() > 0) {
-            frame = frame_queue.front();
-            frame_queue.pop();
-            return (!frame.empty());
+        if (state == STATE::INACTIVE) {
+            return capture.read(frame); // read a new frame from video 
+        }
+        else if (state == STATE::RUNNING) {
+            if (frame_queue.size() > 0) {
+                frame = frame_queue.front();
+                frame_queue.pop();
+                return (!frame.empty());
+            }
+            else {
+                return false;
+            }
         }
         else {
             return false;
         }
-        
     }
 
     void grabFrame() {

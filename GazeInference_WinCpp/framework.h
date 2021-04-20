@@ -70,6 +70,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui_c.h>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #pragma comment(lib, "opencv_world451.lib")
 
 // Custom Headers

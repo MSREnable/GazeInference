@@ -4,7 +4,8 @@
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/gui_widgets.h>
 #include <dlib/image_io.h>
-#pragma comment(lib, "dlib19.21.0_debug_64bit_msvc1928.lib") 
+//#pragma comment(lib, "dlib19.21.0_debug_64bit_msvc1928.lib") 
+#pragma comment(lib, "dlib19.21.0_release_64bit_msvc1928.lib") 
 #include "UltraFaceNet.h"
 
 template <typename T>
@@ -56,7 +57,7 @@ private:
 
     const int IMAGE_WIDTH = 224;
     const int IMAGE_HEIGHT = 224;
-    const int SKIP_FRAMES = 1;
+    const int SKIP_FRAMES = 3;
     const int blurring = BLURRING::HIGH;
     
     int detector_type = DETECTOR_TYPE::ULTRA_FACE_SLIM;//ULTRA_FACE_SLIM, ULTRA_FACE
@@ -593,28 +594,28 @@ public:
         else
             is_valid = find_primary_face_ultraFace(webcamImage, face_shape_vector, downscaling);
 
-        //if (is_valid) {
-        //    is_valid = landmarksToRects(face_shape_vector, rectangles);
-        //    if (is_valid) {
-        //        generate_face_eye_images(webcamImage, rectangles, roi_images);
-        //        resize_ROI_images(roi_images);
-        //        show_ROI_extraction(webcamImage, face_shape_vector, rectangles, roi_images);
-        //    }
-        //}
-
-        // For edge devices
         if (is_valid) {
-            is_valid = landmarksToRectsEDGE(face_shape_vector, rectangles);
+            is_valid = landmarksToRects(face_shape_vector, rectangles);
             if (is_valid) {
-                // At edge device
-                cv::Mat face_image = generate_face_image_EDGE(webcamImage, rectangles);
-                // At compute device - input {webcamImage.size(), face_image (original size), rectangles}
-                generate_face_eye_images_COMPUTE(webcamImage.size(), face_image, rectangles, roi_images);
+                generate_face_eye_images(webcamImage, rectangles, roi_images);
                 resize_ROI_images(roi_images);
-                privacy_mask(webcamImage, rectangles[0]);
-                show_ROI_extraction_COMPUTE(webcamImage, face_shape_vector, rectangles, roi_images);
+                //show_ROI_extraction(webcamImage, face_shape_vector, rectangles, roi_images);
             }
         }
+
+        //// For edge devices
+        //if (is_valid) {
+        //    is_valid = landmarksToRectsEDGE(face_shape_vector, rectangles);
+        //    if (is_valid) {
+        //        // At edge device
+        //        cv::Mat face_image = generate_face_image_EDGE(webcamImage, rectangles);
+        //        // At compute device - input {webcamImage.size(), face_image (original size), rectangles}
+        //        generate_face_eye_images_COMPUTE(webcamImage.size(), face_image, rectangles, roi_images);
+        //        resize_ROI_images(roi_images);
+        //        privacy_mask(webcamImage, rectangles[0]);
+        //        //show_ROI_extraction_COMPUTE(webcamImage, face_shape_vector, rectangles, roi_images);
+        //    }
+        //}
 
         for (auto& image : roi_images) {
             image.convertTo(image, CV_32FC3, 1.0 / 255.0);

@@ -9,7 +9,6 @@
 #include "UltraFaceNet.h"
 
 
-
 #define MAX_LOADSTRING 100
 #define DEFAULT_VIDEO_WIDTH 300
 #define DEFAULT_VIDEO_HEIGHT 300
@@ -27,12 +26,8 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 
 FrameCapture* g_pFrameCapture = NULL;
-//const wchar_t* modelFilepath = L"assets/SqueezeNet.onnx";
-//const wchar_t* labelFilepath = L"assets/Labels.txt";
-
-//const wchar_t* modelFilepath = L"assets/itracker.onnx";
-//const wchar_t* modelFilepath = L"assets/itracker_MSR_rc_1_0113.onnx";
-const wchar_t* modelFilepath = L"assets/itracker_MSR_rc_adam_0_9171.onnx";
+const wchar_t* modelFilepath = L"assets/best_checkpoint_MSR_0_78636.onnx";
+//const wchar_t* modelFilepath = L"assets/best_checkpoint_MSR_DEN_0_9992.onnx";
 const wchar_t* labelFilepath = NULL;
 std::unique_ptr<ITrackerModel> model;
 
@@ -75,6 +70,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAZEINFERENCEWINCPP));
 
 	MSG msg;
+
 
 	// Main message loop:
 	while (GetMessage(&msg, nullptr, 0, 0))
@@ -142,6 +138,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		return FALSE;
 	}
 
+	
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
@@ -175,6 +172,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_PAINT:
+		ShowWindow(hWnd, SW_SHOWMINIMIZED);
 		OnPaint(hWnd);
 		//g_pFrameCapture->OnPaint();
 		break;
@@ -252,60 +250,16 @@ void OnPaint(HWND hWnd)
 {
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hWnd, &ps);
-
 	// TODO: Add any drawing code that uses hdc here...
 
-	//// Ex.1: Using an imagepath to load and fill the inputTensor
-	//std::unique_ptr<SqueezeNet> squeezeNet = std::make_unique<SqueezeNet>(L"assets/SqueezeNet.onnx", L"assets/Labels.txt");
-	//squeezeNet->getFrameFromImagePath("assets/kitten_224.png");
-	//squeezeNet->applyTransformations();
-	//squeezeNet->fillInputTensor();
-	//squeezeNet->run();
-	//squeezeNet->processOutput(true);
-
-
-	//// Ex.2: Using the default camera to get frame and fill the inputTensor in a loop
-	//std::unique_ptr<SqueezeNet> squeezeNet = std::make_unique<SqueezeNet>(L"assets/SqueezeNet.onnx", L"assets/Labels.txt");
-	//squeezeNet->init();
-	//while (squeezeNet->getCameraFrame()) {
-	//	squeezeNet->applyTransformations();
-	//	squeezeNet->fillInputTensor();
-	//	squeezeNet->run();
-	//	squeezeNet->processOutput(true);
-	//}
-
-	//// Ex.3: Working iTracker model inference to generate (x,y) coordinates
+	// Working iTracker model inference to generate (x,y) coordinates
 	model->initCamera();
-	//cv::Mat frame;
-	//std::vector<cv::Mat> roi_images;
-	//std::vector<float> coordinates_XY;
-	//bool is_valid;
-
-	//while (model->getFrame()) { //reads a new frame
-	//	is_valid = model->applyTransformations();
-	//	if (!is_valid)
-	//		continue;
-	//	model->fillInputTensor();
-	//	model->run();
-	//	coordinates_XY = model->processOutput();
-	//}
-
 	model->runInference();
 
 	//model->initCamera();
 	//model->benchmark2();
 	//model->benchmark_dlib();
 
-	//std::unique_ptr<UltraFaceNet> ultraFaceNet = std::make_unique<UltraFaceNet>(L"assets/version-RFB-320_without_postprocessing.onnx");
-	//std::unique_ptr<UltraFaceNet> ultraFaceNet = std::make_unique<UltraFaceNet>(L"assets/version-slim-320_without_postprocessing.onnx");
-	//ultraFaceNet->initCamera();
-	//while (ultraFaceNet->getFrame()) {
-	//	ultraFaceNet->applyTransformations();
-	//	ultraFaceNet->fillInputTensor();
-	//	ultraFaceNet->run();
-	//	ultraFaceNet->processOutput(true);
-	//}
-	
 	EndPaint(hWnd, &ps);
 }
 
@@ -327,6 +281,10 @@ void OnChar(HWND hWnd, wchar_t c)
 		//{	
 		//	g_pFrameCapture->ChangePreviewState(1);//Play
 		//}
+		break;
+	case L'c':
+	case L'C':
+		//model->addCalibrationPoint();
 		break;
 	}
 }

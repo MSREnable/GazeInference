@@ -1,5 +1,21 @@
 #pragma once
 #include "framework.h"
+#include "providers.h"
+#include "dml_provider_factory.h"
+
+
+const OrtApi* g_ort = NULL;
+
+#define ORT_ABORT_ON_ERROR(expr)                             \
+  do {                                                       \
+    OrtStatus* onnx_status = (expr);                         \
+    if (onnx_status != NULL) {                               \
+      const char* msg = g_ort->GetErrorMessage(onnx_status); \
+      fprintf(stderr, "%s\n", msg);                          \
+      g_ort->ReleaseStatus(onnx_status);                     \
+      abort();                                               \
+    }                                                        \
+  } while (0);
 
 struct Input {
     char* name;
@@ -45,12 +61,21 @@ public:
 
 private:
     void enable_hardware_acceleration(OrtSessionOptions* session_options) {
-//#ifdef USE_CUDA
+        ORT_ABORT_ON_ERROR(OrtSessionOptionsAppendExecutionProvider_DML(session_options, 0));
 #if defined(USE_CUDA)
         ORT_ABORT_ON_ERROR(OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, 0));
-//#elifdef USE_DML
 #elif defined(USE_DML)
         ORT_ABORT_ON_ERROR(OrtSessionOptionsAppendExecutionProvider_DML(session_options, 0));
+#elif defined(USE_OpenVINO)
+        OrtOpenVINOProviderOptions options;
+        options.device_type = "CPU_FP32";
+        options.enable_vpu_fast_compile = 0;
+        options.device_id = "";
+        options.num_of_threads = 8;
+        ORT_ABORT_ON_ERROR(SessionOptionsAppendExecutionProvider_OpenVINO(session_options, &options));
+        // Turn off high level optimizations performed by ONNX Runtime 
+        // before handing the graph over to OpenVINO backend.
+        session_options.SetGraphOptimizationLevel(ORT_DISABLE_ALL);
 #else
         //do nothing
 #endif
@@ -61,8 +86,8 @@ private:
         // Modify session options here 
         session_options.SetInterOpNumThreads(numInterOpsThreads);//parallel execution of operators
         session_options.SetIntraOpNumThreads(numIntraOpsThreads);//parallelization of induvidual operator
+        //session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
         enable_hardware_acceleration(session_options);
-        session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
         return session_options;
     }
 

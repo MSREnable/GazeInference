@@ -2,6 +2,7 @@
 #include "Model.h"
 #include "DlibFaceDetector.h"
 #include "LiveCapture.h"
+#include "DelaunayCalibrator.h"
 #include "EyeGazeIoctlLibrary.h"
 #pragma comment(lib, "EyeGazeIoctlLibrary.lib")
 #include "cam2screen.h"
@@ -18,6 +19,7 @@ private:
     std::tuple<std::string, float> result = std::tuple<std::string, float>("Unknown", 0.0f);
     std::unique_ptr<LiveCapture> live_capture;
     std::unique_ptr<DlibFaceDetector> detector;
+    std::unique_ptr<DelaunayCalibrator> calibrator;
 
     std::chrono::steady_clock::time_point epoch;
     double timestamp_ms = -1;
@@ -28,6 +30,9 @@ private:
     FLOAT xMonitorRatio;
     FLOAT yMonitorRatio;
     POINT mousePoint;
+    int screenWidth = GetPrimaryMonitorWidthUm();
+    int screenHeight = GetPrimaryMonitorHeightUm();
+    bool updateMesh = false;
 
 public:
     ITrackerModel(const wchar_t* modelFilePath) 
@@ -51,6 +56,8 @@ public:
         live_capture = std::make_unique<LiveCapture>();
         live_capture->open();
 
+        initCalibrator();
+
         RECT desktopRect;
         HWND desktopHwnd = GetDesktopWindow();
         GetWindowRect(desktopHwnd, &desktopRect);
@@ -59,6 +66,27 @@ public:
         yMonitorRatio = (FLOAT)GetPrimaryMonitorHeightUm() / (FLOAT)desktopRect.bottom;
 
         return ( live_capture && detector);
+    }
+
+    void initCalibrator() {
+
+        //int W = screenWidth;
+        //int H = screenHeight;
+
+        //std::vector<cv::Point2f> actual_coordinates{ cv::Point2f(0, 0), cv::Point2f(W, 0), cv::Point2f(W, H), cv::Point2f(0, H), cv::Point2f(W/2, H/2) };
+        //std::vector<cv::Point2f> predicted_coordinates{ cv::Point2f(0, 0), cv::Point2f(W, 0), cv::Point2f(W, H), cv::Point2f(0, H), cv::Point2f(W/2, H/2) };
+
+        //////std::vector<cv::Point2f> actual_coordinates{ cv::Point2f(10, 10), cv::Point2f(W - 10, 10), cv::Point2f(W - 10, H - 10), cv::Point2f(10, H - 10), cv::Point2f((W - 10) / 2, (H - 10) / 2), cv::Point2f((W - 10) / 3, (H - 10) / 4), cv::Point2f(2 * (W - 10) / 3, 3 * (H - 10) / 4) };
+        //////std::vector<cv::Point2f> predicted_coordinates{ cv::Point2f(10 + 30, 10 + 90), cv::Point2f(W - 10 + 100, 10 + 20), cv::Point2f(W - 10 - 60, H - 10 - 20), cv::Point2f(10 + 30, H - 10 - 130), cv::Point2f((W - 10) / 2 - 40, (H - 10) / 2 + 160), cv::Point2f((W - 10) / 3 + 30, (H - 10) / 4 - 20), cv::Point2f(2 * (W - 10) / 3 + 110, 3 * (H - 10) / 4 - 30) };
+
+
+        //// Screen size (can use desktopRect as well)
+        //cv::Rect rect = cv::Rect(0, 0, screenWidth, screenHeight);
+        //calibrator = std::make_unique<DelaunayCalibrator>(rect, actual_coordinates, predicted_coordinates);
+
+        // Screen size (can use desktopRect as well)
+        cv::Rect rect = cv::Rect(0, 0, screenWidth, screenHeight);
+        calibrator = std::make_unique<DelaunayCalibrator>(rect, std::vector<cv::Point2f>(), std::vector<cv::Point2f>());
     }
 
     bool getFrameFromImagePath(std::string imageFilepath) {
@@ -103,19 +131,20 @@ public:
         return true;
     }
 
+    //void addCalibrationPoint() {
+    //    this->updateMesh = true;
+    //}
+
     std::vector<float> processOutput() {
         std::vector<float> coordinates = outputs[0].values;
         float x = coordinates[0];
         float y = coordinates[1];
         LOG_DEBUG("x=%.2f, y=%.2f\n", x, y);
 
-
-        const auto p1 = std::chrono::system_clock::now();
-        long long timestamp_um_from_epoch = std::chrono::duration_cast<std::chrono::microseconds>(
-            p1.time_since_epoch()).count();
-
         int xMouse;
         int yMouse;
+
+
         if (GetCursorPos(&mousePoint))
         {
             // mouse is returned in pixels, need to convert to um
@@ -123,12 +152,29 @@ public:
             yMouse = (INT32)(mousePoint.y * yMonitorRatio);
         }
 
-        cv::Point point = cam2screen(x, y,
-            GetPrimaryMonitorWidthUm(),
-            GetPrimaryMonitorHeightUm());
-        LOG_DEBUG("X=%d (%d), Y=%d (%d)\n", point.x, xMouse, point.y, yMouse);
-        SendGazeReportUm(point.x, point.y, timestamp_um_from_epoch);
-        //SendGazeReportUm(point.x, point.y, 0);
+        // Convert to screen coordinates
+        cv::Point point = cam2screen(x, y, screenWidth, screenHeight);
+
+        cv::Point calibratedPoint;
+
+        //#define VK_LBUTTON        0x01
+        //#define VK_RBUTTON        0x02
+        //#define VK_CANCEL         0x03
+        //#define VK_MBUTTON        0x04 
+        // Left button Down
+        if (GetAsyncKeyState(VK_RBUTTON) != 0){
+            // collect more data points for calibration
+            calibrator->add(cv::Point(xMouse, yMouse), point);
+            //this->updateMesh = false;
+        }
+
+        // Calibrate for distortion
+        calibratedPoint = calibrator->calibrate(point);
+        LOG_DEBUG("Mouse (%d, %d) | Predicted (%d, %d) | Calibrated (%d, %d)\n", xMouse, yMouse, point.x, point.y, calibratedPoint.x, calibratedPoint.y);
+        calibrator->drawDelaunayMap();
+
+        // Send to GazeHID
+        SendGazeReportUm(calibratedPoint.x, calibratedPoint.y, 0);
 
         return coordinates;
     }
@@ -150,17 +196,8 @@ public:
         }
     }
 
-    //void frameInference() {
-    //    while (true) {
-    //        fillInputTensor();
-    //        run();
-    //        processOutput();
-    //    }
-    //}
-
     void runInference() {
         frame_process_thread = std::thread(&ITrackerModel::processFrame, this);
-        //inference_thread = std::thread(&ITrackerModel::frameInference, this);
     }
 
     int benchmark() {

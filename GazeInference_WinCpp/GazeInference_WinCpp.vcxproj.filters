@@ -75,6 +75,9 @@
     <ClInclude Include="cam2screen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DelaunayCalibrator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GazeInference_WinCpp.cpp">
@@ -107,10 +110,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\libraries\onnxruntime.dll" />
-    <None Include="..\libraries\onnxruntime.pdb" />
-    <None Include="..\libraries\opencv_world451d.pdb" />
-    <None Include="..\libraries\opencv_world451d.dll" />
     <None Include="assets\SqueezeNet.onnx">
       <Filter>assets</Filter>
     </None>
@@ -120,7 +119,6 @@
     <None Include="assets\itracker.onnx">
       <Filter>assets</Filter>
     </None>
-    <None Include="..\libraries\dlib.pdb" />
     <None Include="assets\version-RFB-320_without_postprocessing.onnx">
       <Filter>assets</Filter>
     </None>
@@ -128,8 +126,6 @@
       <Filter>assets</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.pdb" />
-    <None Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.dll" />
     <None Include="device_metrics_sku.json">
       <Filter>assets</Filter>
     </None>
@@ -139,12 +135,17 @@
     <None Include="assets\itracker_MSR_rc_adam_0_9171.onnx">
       <Filter>assets</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\libraries\onnxruntime.lib" />
-    <Library Include="..\libraries\opencv_world451d.lib" />
-    <Library Include="..\libraries\dlib19.21.0_debug_64bit_msvc1928.lib" />
-    <Library Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.lib" />
+    <None Include="assets\best_checkpoint_MSR_0_78636.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\libraries\Release\EyeGazeIoctlLibrary.dll" />
+    <None Include="..\libraries\Release\opencv_world451.dll" />
+    <None Include="assets\best_checkpoint_MSR_DEN_0_9992.onnx">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\onnxruntime.dll" />
+    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\custom_op_library.dll" />
+    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\DirectML.dll" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="assets\Labels.txt">

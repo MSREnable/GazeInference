@@ -6,6 +6,14 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="DML|Win32">
+      <Configuration>DML</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DML|x64">
+      <Configuration>DML</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -40,6 +48,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -47,6 +62,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -64,10 +86,16 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DML|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -77,13 +105,23 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\ExternalLibraries\dlib-19.21\examples\build\dlib_build;C:\ExternalLibraries\opencv\build\x64\vc15\lib;C:\ExternalLibraries\onnxruntime-win-x64-1.6.0\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\ExternalLibraries\dlib-19.21;C:\ExternalLibraries\onnxruntime-win-x64-1.6.0\include;C:\ExternalLibraries\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21\examples\build\dlib_build\Debug;C:\Users\jashar\source\repos\GazeInference\libraries\opencv\build\x64\vc15\lib;C:\Users\jashar\source\repos\GazeInference\libraries\onnxruntime-win-x64-gpu-1.6.0\lib;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\GazeInference\libraries\onnxruntime-win-x64-gpu-1.6.0\include;C:\Users\jashar\source\repos\GazeInference\libraries\opencv\build\include;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\GazeInference\libraries\onnxruntime-win-x64-gpu-1.6.0\include;C:\Users\jashar\source\repos\GazeInference\libraries\opencv\build\include;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\jashar\source\repos\MSREnable\GazeHid\x64\Release;C:\Users\jashar\source\repos\GazeInference\libraries\opencv\build\x64\vc15\lib;C:\Users\jashar\source\repos\GazeInference\libraries\onnxruntime-win-x64-gpu-1.6.0\lib;C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21\examples\build\dlib_build\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\GazeInference\libraries\onnxruntime-win-x64-dml-1.6.0\include;C:\Users\jashar\source\repos\GazeInference\libraries\opencv\build\include;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\jashar\source\repos\MSREnable\GazeHid\x64\Release;C:\Users\jashar\source\repos\GazeInference\libraries\opencv\build\x64\vc15\lib;C:\Users\jashar\source\repos\GazeInference\libraries\onnxruntime-win-x64-dml-1.6.0\lib;C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21\examples\build\dlib_build\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -98,6 +136,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DML|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -136,6 +190,24 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\GazeInference\libraries\onnxruntime-win-x64-gpu-1.6.0\lib;C:\Users\jashar\source\repos\GazeInference\libraries\opencv\build\x64\vc15\lib;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\GazeInference\libraries\onnxruntime-win-x64-dml-1.6.0\include;C:\Users\jashar\source\repos\GazeInference\libraries\opencv\build\x64\vc15\lib;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,6 +220,7 @@
     <ClInclude Include="cam2screen.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="cv_constants.h" />
+    <ClInclude Include="DelaunayCalibrator.h" />
     <ClInclude Include="DlibFaceDetector.h" />
     <ClInclude Include="FrameCapture.h" />
     <ClInclude Include="framework.h" />
@@ -184,25 +257,27 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.dll">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-      <FileType>Document</FileType>
+    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\custom_op_library.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='DML|x64'">true</DeploymentContent>
     </None>
-    <None Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.pdb" />
-    <None Include="..\libraries\dlib.pdb">
+    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\DirectML.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='DML|x64'">true</DeploymentContent>
+    </None>
+    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\onnxruntime.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='DML|x64'">true</DeploymentContent>
+    </None>
+    <None Include="..\libraries\Release\EyeGazeIoctlLibrary.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='DML|x64'">true</DeploymentContent>
+    </None>
+    <None Include="..\libraries\Release\opencv_world451.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='DML|x64'">true</DeploymentContent>
+    </None>
+    <None Include="assets\best_checkpoint_MSR_0_78636.onnx">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
     </None>
-    <None Include="..\libraries\onnxruntime.dll">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </None>
-    <None Include="..\libraries\onnxruntime.pdb">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </None>
-    <None Include="..\libraries\opencv_world451d.dll">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-      <FileType>Document</FileType>
-    </None>
-    <None Include="..\libraries\opencv_world451d.pdb">
+    <None Include="assets\best_checkpoint_MSR_DEN_0_9992.onnx">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
     </None>
     <None Include="assets\itracker.onnx">
@@ -226,20 +301,6 @@
     </None>
     <None Include="device_metrics_sku.json" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\MSREnable\GazeHid\x64\Debug\EyeGazeIoctlLibrary.lib">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Library>
-    <Library Include="..\libraries\dlib19.21.0_debug_64bit_msvc1928.lib">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Library>
-    <Library Include="..\libraries\onnxruntime.lib">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Library>
-    <Library Include="..\libraries\opencv_world451d.lib">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-    </Library>
   </ItemGroup>
   <ItemGroup>
     <Text Include="assets\Labels.txt">
