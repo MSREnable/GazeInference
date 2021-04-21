@@ -69,24 +69,9 @@ public:
     }
 
     void initCalibrator() {
-
-        //int W = screenWidth;
-        //int H = screenHeight;
-
-        //std::vector<cv::Point2f> actual_coordinates{ cv::Point2f(0, 0), cv::Point2f(W, 0), cv::Point2f(W, H), cv::Point2f(0, H), cv::Point2f(W/2, H/2) };
-        //std::vector<cv::Point2f> predicted_coordinates{ cv::Point2f(0, 0), cv::Point2f(W, 0), cv::Point2f(W, H), cv::Point2f(0, H), cv::Point2f(W/2, H/2) };
-
-        //////std::vector<cv::Point2f> actual_coordinates{ cv::Point2f(10, 10), cv::Point2f(W - 10, 10), cv::Point2f(W - 10, H - 10), cv::Point2f(10, H - 10), cv::Point2f((W - 10) / 2, (H - 10) / 2), cv::Point2f((W - 10) / 3, (H - 10) / 4), cv::Point2f(2 * (W - 10) / 3, 3 * (H - 10) / 4) };
-        //////std::vector<cv::Point2f> predicted_coordinates{ cv::Point2f(10 + 30, 10 + 90), cv::Point2f(W - 10 + 100, 10 + 20), cv::Point2f(W - 10 - 60, H - 10 - 20), cv::Point2f(10 + 30, H - 10 - 130), cv::Point2f((W - 10) / 2 - 40, (H - 10) / 2 + 160), cv::Point2f((W - 10) / 3 + 30, (H - 10) / 4 - 20), cv::Point2f(2 * (W - 10) / 3 + 110, 3 * (H - 10) / 4 - 30) };
-
-
-        //// Screen size (can use desktopRect as well)
-        //cv::Rect rect = cv::Rect(0, 0, screenWidth, screenHeight);
-        //calibrator = std::make_unique<DelaunayCalibrator>(rect, actual_coordinates, predicted_coordinates);
-
         // Screen size (can use desktopRect as well)
         cv::Rect rect = cv::Rect(0, 0, screenWidth, screenHeight);
-        calibrator = std::make_unique<DelaunayCalibrator>(rect, std::vector<cv::Point2f>(), std::vector<cv::Point2f>());
+        calibrator = std::make_unique<DelaunayCalibrator>(rect);
     }
 
     bool getFrameFromImagePath(std::string imageFilepath) {
@@ -157,11 +142,8 @@ public:
 
         cv::Point calibratedPoint;
 
-        //#define VK_LBUTTON        0x01
-        //#define VK_RBUTTON        0x02
-        //#define VK_CANCEL         0x03
-        //#define VK_MBUTTON        0x04 
-        // Left button Down
+        // VK_LBUTTON, VK_RBUTTON
+        // Right button Down
         if (GetAsyncKeyState(VK_RBUTTON) != 0){
             // collect more data points for calibration
             calibrator->add(cv::Point(xMouse, yMouse), point);

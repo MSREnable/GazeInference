@@ -32,23 +32,7 @@ private:
     std::vector<cv::Point2f> default_coordinates;
 
 public:
-    //DelaunayCalibrator(cv::Rect rect, std::vector<cv::Point2f> actual_coordinates, std::vector<cv::Point2f> predicted_coordinates) {
-    //    initDelaunaySpace(rect, this->margin);
-    //    actual_coordinates = InputToDelaunay(actual_coordinates);
-    //    predicted_coordinates = InputToDelaunay(predicted_coordinates);
-
-    //    extend(actual_coordinates, this->default_coordinates);
-    //    extend(predicted_coordinates, this->default_coordinates);
-
-    //    // Apply rect to limit the coordinates
-    //    this->actual_coordinates = limitXY(actual_coordinates);
-    //    this->predicted_coordinates = limitXY(predicted_coordinates);
-
-    //    this->actualMesh = createDelaunayMesh(limitXY(this->actual_coordinates));
-    //    this->predictedMesh = createDelaunayMesh(limitXY(this->predicted_coordinates));
-    //}
-
-    DelaunayCalibrator(cv::Rect rect, std::vector<cv::Point2f> actual_coordinates, std::vector<cv::Point2f> predicted_coordinates) {
+    DelaunayCalibrator(cv::Rect rect) {
         initDelaunaySpace(rect, this->margin);
 
         // Apply rect to limit the coordinates
@@ -59,7 +43,7 @@ public:
         this->predictedMesh = cv::Subdiv2D(this->rect);
     }
 
-    void initDelaunaySpace(cv::Rect rect, float margin=0.50) {
+    void initDelaunaySpace(cv::Rect rect, float margin=0.10) {
         this->margin = margin;
         float stretch = 1.0 + (2 * margin);
         this->orig = cv::Point2f(rect.width, rect.height);
@@ -140,13 +124,6 @@ public:
             float x = std::max(std::min(W - 1, point.x), origX);
             float y = std::max(std::min(H - 1, point.y), origY);
             return cv::Point2f(x, y);
-    }
-
-    cv::Subdiv2D createDelaunayMesh(std::vector<cv::Point2f> coordinates) {
-        // Initialize Subdivision
-        cv::Subdiv2D mesh = cv::Subdiv2D(this->rect);
-        mesh.insert(coordinates);
-        return mesh;
     }
 
     cv::Point2f calibrate(cv::Point2f searchPoint) {
@@ -267,7 +244,6 @@ public:
         // Keep the image size small
         cv::Mat img(img_rect.size(), CV_8UC3);
         img = cv::Scalar::all(0);
-        //cv::Mat img = cv::Mat(cv::Size(this->rect.width, this->rect.height), CV_32FC3);
         drawDelaunay(img, this->actualMesh, cv::Scalar(0, 255, 0) /*Green*/);
         drawDelaunay(img, this->predictedMesh, cv::Scalar(255, 0, 0)/*Blue*/);
         cv::imshow("DelaunayDistortionMap", img);
