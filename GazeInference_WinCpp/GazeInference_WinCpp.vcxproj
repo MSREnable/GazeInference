@@ -225,7 +225,11 @@
     <ClInclude Include="FrameCapture.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GazeInference_WinCpp.h" />
-    <ClInclude Include="LiveCapture_old.h" />
+    <ClInclude Include="GenMatrix.h" />
+    <ClInclude Include="LinearRBF.h" />
+    <ClInclude Include="LinearRBFCalibrator.h" />
+    <ClInclude Include="LinearRBFTypes.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="SqueezeNet.h" />
     <ClInclude Include="ITrackerModel.h" />
     <ClInclude Include="LiveCapture.h" />
@@ -241,6 +245,9 @@
   <ItemGroup>
     <ClCompile Include="FrameCapture.cpp" />
     <ClCompile Include="GazeInference_WinCpp.cpp" />
+    <ClCompile Include="GenMatrix.cpp" />
+    <ClCompile Include="LinearRBF.cpp" />
+    <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Preview.cpp" />
   </ItemGroup>
   <ItemGroup>

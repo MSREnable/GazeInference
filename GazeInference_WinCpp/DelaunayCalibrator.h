@@ -1,6 +1,11 @@
 #pragma once
 #include "framework.h";
 
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <vector>
+#include <fstream>
 
 template <typename T>
 std::vector<T> selectIndices(std::vector<T> vec, std::vector<int> indices)
@@ -34,13 +39,7 @@ private:
 public:
     DelaunayCalibrator(cv::Rect rect) {
         initDelaunaySpace(rect, this->margin);
-
-        // Apply rect to limit the coordinates
-        this->actual_coordinates = std::vector<cv::Point2f>();
-        this->predicted_coordinates = std::vector<cv::Point2f>();
-
-        this->actualMesh = cv::Subdiv2D(this->rect);
-        this->predictedMesh = cv::Subdiv2D(this->rect);
+        this->add(this->default_coordinates, this->default_coordinates, false);
     }
 
     void initDelaunaySpace(cv::Rect rect, float margin=0.10) {
@@ -48,6 +47,9 @@ public:
         float stretch = 1.0 + (2 * margin);
         this->orig = cv::Point2f(rect.width, rect.height);
         this->rect = cv::Rect(0, 0, stretch * this->orig.x, stretch * this->orig.y);
+        this->actualMesh = cv::Subdiv2D(this->rect);
+        this->predictedMesh = cv::Subdiv2D(this->rect);
+
         this->default_coordinates = {
                                         cv::Point2f(0, 0),
                                         cv::Point2f(this->rect.width, 0),
@@ -55,8 +57,17 @@ public:
                                         cv::Point2f(0, this->rect.height)
 
         };
+        this->actual_coordinates = std::vector<cv::Point2f>();
+        this->predicted_coordinates = std::vector<cv::Point2f>();
         this->ratio = (float)this->img_width / this->rect.width;
         this->img_rect = cv::Rect(0, 0, this->rect.width * ratio, this->rect.height * ratio);
+    }
+
+    void reset() {
+        this->actual_coordinates = std::vector<cv::Point2f>();
+        this->predicted_coordinates = std::vector<cv::Point2f>();
+        this->actualMesh = cv::Subdiv2D(this->rect);
+        this->predictedMesh = cv::Subdiv2D(this->rect);
     }
 
     std::vector<cv::Point2f> InputToDelaunay(std::vector<cv::Point2f> in_vector) {
@@ -78,10 +89,14 @@ public:
         return cv::Point2f(point.x - this->orig.x * this->margin, point.y - this->orig.y * this->margin);
     }
 
-    void add(cv::Point2f actualCoordinate, cv::Point2f predictedCoordinate) {
+    void add(cv::Point2f actualCoordinate, cv::Point2f predictedCoordinate, bool remap = true) {
         // Convert to Delaunay Space
-        actualCoordinate = InputToDelaunay(actualCoordinate);
-        predictedCoordinate = InputToDelaunay(predictedCoordinate);
+        if (remap) {
+            actualCoordinate = InputToDelaunay(actualCoordinate);
+            predictedCoordinate = InputToDelaunay(predictedCoordinate);
+        }
+        actualCoordinate = limitXY(actualCoordinate);
+        predictedCoordinate = limitXY(predictedCoordinate);
 
         this->actual_coordinates.push_back(actualCoordinate);
         this->predicted_coordinates.push_back(predictedCoordinate);
@@ -89,13 +104,19 @@ public:
         this->predictedMesh.insert(predictedCoordinate);
     }
 
-    void add(std::vector<cv::Point2f> actualCoordinates, std::vector<cv::Point2f> predictedCoordinates) {
+    void add(std::vector<cv::Point2f> actualCoordinates, std::vector<cv::Point2f> predictedCoordinates, bool remap = true) {
         // Convert to Delaunay Space
-        actualCoordinates = InputToDelaunay(actualCoordinates);
-        predictedCoordinates = InputToDelaunay(predictedCoordinates);
+        if (remap) {
+            actualCoordinates = InputToDelaunay(actualCoordinates);
+            predictedCoordinates = InputToDelaunay(predictedCoordinates);
+        }
+        actualCoordinates = limitXY(actualCoordinates);
+        predictedCoordinates = limitXY(predictedCoordinates);
 
+        // Add to the coordinate vector
         extend(this->actual_coordinates, actualCoordinates);
         extend(this->predicted_coordinates, predictedCoordinates);
+        // Add to the vector
         this->actualMesh.insert(actualCoordinates);
         this->predictedMesh.insert(predictedCoordinates);
     }
@@ -126,7 +147,14 @@ public:
             return cv::Point2f(x, y);
     }
 
-    cv::Point2f calibrate(cv::Point2f searchPoint) {
+    cv::Subdiv2D createDelaunayMesh(std::vector<cv::Point2f> coordinates) {
+        // Initialize Subdivision
+        cv::Subdiv2D mesh = cv::Subdiv2D(this->rect);
+        mesh.insert(coordinates);
+        return mesh;
+    }
+
+    cv::Point2f evaluate(cv::Point2f searchPoint) {
         if (this->actual_coordinates.size() > 3) {
             // Map to Delaunay space
             searchPoint = InputToDelaunay(searchPoint);
@@ -240,10 +268,11 @@ public:
     }
 
     // Fix problem with img creation
-    void drawDelaunayMap(){
+    void drawDistortionMap(){
         // Keep the image size small
         cv::Mat img(img_rect.size(), CV_8UC3);
         img = cv::Scalar::all(0);
+        //cv::Mat img = cv::Mat(cv::Size(this->rect.width, this->rect.height), CV_32FC3);
         drawDelaunay(img, this->actualMesh, cv::Scalar(0, 255, 0) /*Green*/);
         drawDelaunay(img, this->predictedMesh, cv::Scalar(255, 0, 0)/*Blue*/);
         cv::imshow("DelaunayDistortionMap", img);
@@ -281,6 +310,97 @@ public:
         else {
             return false;
         }
+    }
+
+    //void save() {
+    //    const wchar_t* calibrationModelPath = L"assets/calibrationModel.txt";
+    //    //std::ofstream output_file(calibrationModelPath, std::ios::out | std::ofstream::binary);
+    //    std::ofstream output_file(calibrationModelPath);
+    //    std::ostream_iterator<cv::Point2f> output_iterator(output_file);
+    //    std::copy(this->actual_coordinates.begin(), this->actual_coordinates.end(), output_iterator);
+    //    //load();
+    //}
+
+    void save() {
+        const wchar_t* calibrationModelPath = L"assets/calibrationModel.txt";
+        this->serialize(calibrationModelPath);
+    }
+
+    void load() {
+        const wchar_t* calibrationModelPath = L"assets/calibrationModel.txt";
+        this->deserialize(calibrationModelPath);
+    }
+
+    bool serialize(const wchar_t* path) const {
+
+        std::ofstream out(path);
+
+        //std::ofstream out;
+        //out.open(path, std::ios::out | std::ios::trunc | std::ios::binary);
+        if (!out.is_open())
+            return false;
+
+        out << this->actual_coordinates.size(); //serialize size of string
+        
+        out << ';'; //seperator
+        for (int i = 0; i < this->actual_coordinates.size(); i++) {
+            out << '['; 
+            out << this->actual_coordinates[i].x; 
+            out << ','; //number seperator
+            out << this->actual_coordinates[i].y;
+            out << ']'; 
+        }
+
+        out << ';'; //seperator
+        for (int i = 0; i < this->predicted_coordinates.size(); i++) {
+            out << '['; 
+            out << this->predicted_coordinates[i].x;
+            out << ','; //number seperator
+            out << this->predicted_coordinates[i].y;
+            out << ']';
+        }
+        
+        return true;
+    }
+
+    bool deserialize(const wchar_t* path) {
+
+        std::ifstream in(path);
+
+        //std::ifstream in;
+        //in.open(path, std::ios::in | std::ios::binary | std::ios::ate);
+
+        if (!in.is_open())
+            return false;
+
+        int len = 0;
+        char sep;
+        float x, y;
+        in >> len;  //deserialize size of vector
+        std::vector<cv::Point2f> actual(len), predicted(len);
+        in >> sep; //read in the ;
+        for (int i = 0; i < len; i++) {
+            in >> sep; //read in the [
+            in >> x;
+            in >> sep; //read in the ,
+            in >> y;
+            in >> sep; //read in the ]
+            actual[i] = cv::Point2f(x, y);
+        }
+
+        in >> sep; //read in the ;
+        for (int i = 0; i < len; i++) {
+            in >> sep; //read in the [
+            in >> x;
+            in >> sep; //read in the ,
+            in >> y;
+            in >> sep; //read in the ]
+            predicted[i] = cv::Point2f(x, y);
+        }
+        // No remapping required as the coordinates are already mapped to DelaunaySpace
+        this->reset();
+        this->add(actual, predicted, false);
+        return true;
     }
 
 };

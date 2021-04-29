@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <ctime>
+#include "LinearRBFCalibrator.h"
 
 
 // ITracker Model
@@ -19,7 +20,8 @@ private:
     std::tuple<std::string, float> result = std::tuple<std::string, float>("Unknown", 0.0f);
     std::unique_ptr<LiveCapture> live_capture;
     std::unique_ptr<DlibFaceDetector> detector;
-    std::unique_ptr<DelaunayCalibrator> calibrator;
+    //std::unique_ptr<DelaunayCalibrator> calibrator;
+    std::unique_ptr<LinearRBFCalibrator> calibrator;
 
     std::chrono::steady_clock::time_point epoch;
     double timestamp_ms = -1;
@@ -71,7 +73,9 @@ public:
     void initCalibrator() {
         // Screen size (can use desktopRect as well)
         cv::Rect rect = cv::Rect(0, 0, screenWidth, screenHeight);
-        calibrator = std::make_unique<DelaunayCalibrator>(rect);
+        //calibrator = std::make_unique<DelaunayCalibrator>(rect);
+        calibrator = std::make_unique<LinearRBFCalibrator>(rect);
+        calibrator->load();
     }
 
     bool getFrameFromImagePath(std::string imageFilepath) {
@@ -150,10 +154,14 @@ public:
             //this->updateMesh = false;
         }
 
+        if (GetAsyncKeyState(VK_LBUTTON) != 0) {
+            calibrator->save();
+        }
+
         // Calibrate for distortion
-        calibratedPoint = calibrator->calibrate(point);
+        calibratedPoint = calibrator->evaluate(point);
         LOG_DEBUG("Mouse (%d, %d) | Predicted (%d, %d) | Calibrated (%d, %d)\n", xMouse, yMouse, point.x, point.y, calibratedPoint.x, calibratedPoint.y);
-        calibrator->drawDelaunayMap();
+        calibrator->drawDistortionMap();
 
         // Send to GazeHID
         SendGazeReportUm(calibratedPoint.x, calibratedPoint.y, 0);

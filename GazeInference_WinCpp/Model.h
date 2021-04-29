@@ -3,6 +3,8 @@
 #include "providers.h"
 #include "dml_provider_factory.h"
 
+#define USE_DML true
+
 
 const OrtApi* g_ort = NULL;
 
@@ -51,8 +53,8 @@ private:
     std::vector<const char*> outputNames;
     std::vector<Ort::Value> inputTensors;
     std::vector<Ort::Value> outputTensors;
-    const int numInterOpsThreads = 1;
-    const int numIntraOpsThreads = 1;
+    const int numInterOpsThreads = 16;
+    const int numIntraOpsThreads = 16;
     
 public:
     std::vector<cv::Mat> preprocessedFrames;
@@ -60,23 +62,45 @@ public:
     std::vector<Output> outputs;
 
 private:
-    void enable_hardware_acceleration(OrtSessionOptions* session_options) {
+    void enable_hardware_acceleration(Ort::SessionOptions &session_options) {
+        int device_id = 0;
+        ////int concurrent_session_runs = GetNumCpuCores();
+        //bool enable_cpu_mem_arena = true;
+        //ExecutionMode execution_mode = ExecutionMode::ORT_SEQUENTIAL;
+        //int repeat_count = 1;
+        ////int p_models = GetNumCpuCores();
+        //GraphOptimizationLevel graph_optimization_level = ORT_ENABLE_ALL;
+        //bool user_graph_optimization_level_set = false;
+        //bool set_denormal_as_zero = false;
+        //OrtLoggingLevel logging_level = ORT_LOGGING_LEVEL_ERROR;
+
+
 #if defined(USE_CUDA)
-        ORT_ABORT_ON_ERROR(OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, 0));
+        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, 0));
 #elif defined(USE_DML)
-        ORT_ABORT_ON_ERROR(OrtSessionOptionsAppendExecutionProvider_DML(session_options, 0));
+        // Disabling mem pattern and forcing single-threaded execution since DML is used
+        session_options.DisableMemPattern();
+        session_options.SetExecutionMode(ExecutionMode::ORT_SEQUENTIAL);
+        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_DML(session_options, device_id));
+
+        //ID3D12Device* device;
+        //ID3D12CommandQueue* cmd_queue;
+        ////REFIID a = IDMLDevice; //IID_ID3D12Device
+        //DML_CREATE_DEVICE_FLAGS flags;
+        //Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProviderEx_DML(session_options, (IDMLDevice*)device, cmd_queue));
 #elif defined(USE_OpenVINO)
         OrtOpenVINOProviderOptions options;
         options.device_type = "CPU_FP32";
         options.enable_vpu_fast_compile = 0;
         options.device_id = "";
         options.num_of_threads = 8;
-        ORT_ABORT_ON_ERROR(SessionOptionsAppendExecutionProvider_OpenVINO(session_options, &options));
+        Ort::ThrowOnError(SessionOptionsAppendExecutionProvider_OpenVINO(session_options, &options));
         // Turn off high level optimizations performed by ONNX Runtime 
         // before handing the graph over to OpenVINO backend.
         session_options.SetGraphOptimizationLevel(ORT_DISABLE_ALL);
 #else
         //do nothing
+        session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 #endif
     }
 
@@ -85,7 +109,6 @@ private:
         // Modify session options here 
         session_options.SetInterOpNumThreads(numInterOpsThreads);//parallel execution of operators
         session_options.SetIntraOpNumThreads(numIntraOpsThreads);//parallelization of induvidual operator
-        //session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
         enable_hardware_acceleration(session_options);
         return session_options;
     }

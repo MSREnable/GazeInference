@@ -69,13 +69,25 @@
     <ClInclude Include="Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LiveCapture_old.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cam2screen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DelaunayCalibrator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GenMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearRBFTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearRBF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearRBFCalibrator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -87,6 +99,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FrameCapture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GenMatrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinearRBF.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

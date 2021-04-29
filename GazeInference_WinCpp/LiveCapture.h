@@ -13,7 +13,7 @@ private:
     int CAPTURE_DEVICE_ID = 0; // Front camera
     int FRAME_RATE = 30;
     cv::Size RESOLUTION = cv::Size(1280, 720);
-    const int buffer_length = 3;
+    const int buffer_length = 30;
     std::queue<cv::Mat> frame_queue = std::queue<cv::Mat>();
     std::thread frame_grabber_thread;
     int state = STATE::INACTIVE;
