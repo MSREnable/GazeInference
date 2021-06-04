@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "GazeInference_Console": {
-      "commandName": "Project",
-      "commandLineArgs": "--input-frame C:\\Users\\joncamp\\Downloads\\gc-data-subset\\gc-data-subset\\00002\\frames\\00000.jpg --model assets\\Model\\itracker.onnx"
-    }
-  }
-}
