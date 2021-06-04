@@ -9,7 +9,7 @@
 #include "DelaunayCalibrator.h"
 
 
-#define USE_EYECONTROL false
+#define USE_EYECONTROL true
 #define USE_CALIBRATION false
 #define USE_VERBOSE false
 
