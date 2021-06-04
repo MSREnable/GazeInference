@@ -1,9 +1,13 @@
 #pragma once
 #include "framework.h"
 #include "providers.h"
-#include "dml_provider_factory.h"
 
-#define USE_DML true
+
+//#define USE_DML true
+
+#ifdef USE_DML
+#include "dml_provider_factory.h"
+#endif
 
 
 const OrtApi* g_ort = NULL;
