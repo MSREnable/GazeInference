@@ -90,6 +90,9 @@
     <ClInclude Include="LinearRBFCalibrator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Calibrator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GazeInference_WinCpp.cpp">

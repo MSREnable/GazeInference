@@ -217,6 +217,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Calibrator.h" />
     <ClInclude Include="cam2screen.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="cv_constants.h" />

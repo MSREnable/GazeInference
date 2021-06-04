@@ -2,26 +2,32 @@
 #include "framework.h";
 #include "LinearRBF.h"
 
-class LinearRBFCalibrator {
+class LinearRBFCalibrator : public Calibrator {
 
 private:
 	float _screenFactor = 0.075F;
 	GazeInference_WinCpp::LinearRBF _linearRBF;
-	cv::Rect _rect;
 
 public:
 	LinearRBFCalibrator(cv::Rect rect) :
 		_linearRBF(12, _screenFactor)
 	{
-		_rect = rect;
+		this->rect = rect;
 
 		//Init
 		_linearRBF.Clear();
-		_linearRBF.InitializeCalibrationTransform(0, 0, _rect.width, _rect.height, _screenFactor, true, 0);
+		_linearRBF.InitializeCalibrationTransform(0, 0, this->rect.width, this->rect.height, _screenFactor, true, 0);
+	}
+
+	void add(std::vector<cv::Point2f> actualPts, std::vector<cv::Point2f> predictedPts) {
+
 	}
 
 	void add(cv::Point2f actualPt, cv::Point2f predictedPt) {
-		//Add
+		// Add to the lists
+		this->actual_coordinates.push_back(actualPt);
+		this->predicted_coordinates.push_back(predictedPt);
+		// Add to the calibration grid
 		double quantizeInputX = predictedPt.x;
 		double quantizeInputY = predictedPt.y;
 		double quantizeOutputX = actualPt.x;
@@ -65,4 +71,6 @@ public:
 
 		//Run_Click(nullptr, nullptr);
 	}
+
+	void reset(){}
 };

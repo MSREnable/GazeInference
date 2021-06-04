@@ -26,8 +26,9 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 
 FrameCapture* g_pFrameCapture = NULL;
-const wchar_t* modelFilepath = L"assets/best_checkpoint_MSR_0_78636.onnx";
+//const wchar_t* modelFilepath = L"assets/best_checkpoint_MSR_0_78636.onnx";
 //const wchar_t* modelFilepath = L"assets/best_checkpoint_MSR_DEN_0_9992.onnx";
+const wchar_t* modelFilepath = L"assets/best_checkpoint_JS_1_0225.onnx";
 const wchar_t* labelFilepath = NULL;
 std::unique_ptr<ITrackerModel> model;
 

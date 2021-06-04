@@ -75,7 +75,7 @@ public:
         cv::Rect rect = cv::Rect(0, 0, screenWidth, screenHeight);
         //calibrator = std::make_unique<DelaunayCalibrator>(rect);
         calibrator = std::make_unique<LinearRBFCalibrator>(rect);
-        calibrator->load();
+        //calibrator->load();
     }
 
     bool getFrameFromImagePath(std::string imageFilepath) {

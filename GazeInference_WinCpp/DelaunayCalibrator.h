@@ -1,6 +1,6 @@
 #pragma once
 #include "framework.h";
-
+#include "Calibrator.h"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -21,12 +21,13 @@ void extend(std::vector<T>& vector1, std::vector<T>& vector2) {
     vector1.insert(vector1.end(), vector2.begin(), vector2.end());
 }
 
-class DelaunayCalibrator {
+class DelaunayCalibrator : public Calibrator {
 private:
-    cv::Rect rect;
+    //cv::Rect rect;
+    //std::vector<cv::Point2f> actual_coordinates;
+    //std::vector<cv::Point2f> predicted_coordinates;
+
     cv::Rect img_rect;
-    std::vector<cv::Point2f> actual_coordinates;
-    std::vector<cv::Point2f> predicted_coordinates;
     cv::Subdiv2D actualMesh;
     cv::Subdiv2D predictedMesh;
     bool status;
