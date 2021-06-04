@@ -9,10 +9,6 @@
 #include "DelaunayCalibrator.h"
 
 
-#define USE_EYECONTROL true
-#define USE_CALIBRATION false
-#define USE_VERBOSE false
-
 #ifdef USE_EYECONTROL
 #include "EyeGazeIoctlLibrary.h"
 #pragma comment(lib, "EyeGazeIoctlLibrary.lib")
@@ -39,9 +35,15 @@ private:
     FLOAT xMonitorRatio;
     FLOAT yMonitorRatio;
     POINT mousePoint;
+
+#ifdef USE_EYECONTROL
     int screenWidth = GetPrimaryMonitorWidthUm();
     int screenHeight = GetPrimaryMonitorHeightUm();
-    bool updateMesh = false;
+#else
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+#endif
+
 
 public:
     ITrackerModel(const wchar_t* modelFilePath) 
@@ -59,7 +61,9 @@ public:
         // Initialize face ROI/landmark detector
         detector = std::make_unique<DlibFaceDetector>();
 
+#ifdef USE_EYECONTROL
         InitializeEyeGaze();
+#endif
         
         // Initialize live capture
         live_capture = std::make_unique<LiveCapture>();
@@ -71,8 +75,8 @@ public:
         HWND desktopHwnd = GetDesktopWindow();
         GetWindowRect(desktopHwnd, &desktopRect);
         // screen size to pixel ratio
-        xMonitorRatio = (FLOAT)GetPrimaryMonitorWidthUm() / (FLOAT)desktopRect.right;
-        yMonitorRatio = (FLOAT)GetPrimaryMonitorHeightUm() / (FLOAT)desktopRect.bottom;
+        xMonitorRatio = (FLOAT)screenWidth / (FLOAT)desktopRect.right;
+        yMonitorRatio = (FLOAT)screenHeight / (FLOAT)desktopRect.bottom;
 
         return ( live_capture && detector);
     }
