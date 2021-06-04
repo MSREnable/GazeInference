@@ -2,14 +2,21 @@
 #include "Model.h"
 #include "DlibFaceDetector.h"
 #include "LiveCapture.h"
-#include "EyeGazeIoctlLibrary.h"
-#pragma comment(lib, "EyeGazeIoctlLibrary.lib")
 #include "cam2screen.h"
-
 #include <chrono>
 #include <ctime>
 #include "LinearRBFCalibrator.h"
 #include "DelaunayCalibrator.h"
+
+
+#define USE_EYECONTROL false
+#define USE_CALIBRATION false
+#define USE_VERBOSE false
+
+#ifdef USE_EYECONTROL
+#include "EyeGazeIoctlLibrary.h"
+#pragma comment(lib, "EyeGazeIoctlLibrary.lib")
+#endif
 
 
 // ITracker Model
@@ -124,31 +131,36 @@ public:
         return true;
     }
 
-    std::vector<float> processOutput() {
-        std::vector<float> coordinates = outputs[0].values;
-        float x = coordinates[0];
-        float y = coordinates[1];
-        LOG_DEBUG("x=%.2f, y=%.2f\n", x, y);
+    cv::Point processOutput() {
+        cv::Point predictedPoint = cv::Point(outputs[0].values[0], outputs[0].values[1]);
+        LOG_DEBUG("x=%.2f, y=%.2f\n", predictedPoint.x, predictedPoint.y);
 
-        int xMouse;
-        int yMouse;
+        // Convert to screen coordinates
+        cv::Point point = cam2screen(predictedPoint, screenWidth, screenHeight);
 
+        
+#ifdef USE_CALIBRATION
+        /*
+        * Use the mouse cursor as gaze target to calibrate
+        */
 
-        if (GetCursorPos(&mousePoint))
-        {
+        /* Retrieve Mouse Cursor Position */
+        int xMouse, yMouse;
+        if (GetCursorPos(&mousePoint)) {
             // mouse is returned in pixels, need to convert to um
             xMouse = (INT32)(mousePoint.x * xMonitorRatio);
             yMouse = (INT32)(mousePoint.y * yMonitorRatio);
         }
 
-        // Convert to screen coordinates
-        cv::Point point = cam2screen(x, y, screenWidth, screenHeight);
 
-        cv::Point calibratedPoint;
-
-
-
-        // #define VK_LEFT, VK_UP, VK_RIGHT, VK_DOWN
+        /* Use Navigation keys for calibration 
+        *
+        * Left Key : Deactivate Calibration
+        * Right Key : Activate Calibration
+        * Down Key : Save Current Calibration Setting
+        * Up Key : Load/Reset calibration with existing Settings
+        * Mouse Right Button: Add new calibration point
+        */
         if (this->calibrator->isActive()) {
             // Disable
             if (GetAsyncKeyState(VK_LEFT) != 0) {
@@ -159,8 +171,6 @@ public:
             if (GetAsyncKeyState(VK_RBUTTON) != 0) {
                 // collect more data points for calibration
                 this->calibrator->add(cv::Point(xMouse, yMouse), point);
-
-                //this->updateMesh = false;
             }
 
             // Save Calibration model (down button)
@@ -183,23 +193,27 @@ public:
                 this->calibrator->setActive(true);
             }
         }
+#endif
 
-
+        cv::Point calibratedPoint;
         if (this->calibrator->isActive()) {
             // Calibrate for distortion
             calibratedPoint = this->calibrator->evaluate(point);
-            LOG_DEBUG("Mouse (%d, %d) | Predicted (%d, %d) | Calibrated (%d, %d)\n", xMouse, yMouse, point.x, point.y, calibratedPoint.x, calibratedPoint.y);
+#ifdef USE_VERBOSE
             this->calibrator->drawDistortionMap();
+#endif
         }
         else {
             calibratedPoint = point;
-            LOG_DEBUG("Mouse (%d, %d) | Predicted (%d, %d) | Calibrated (%d, %d)\n", xMouse, yMouse, point.x, point.y, calibratedPoint.x, calibratedPoint.y);
         }
+        LOG_DEBUG("Predicted (%d, %d) | Calibrated (%d, %d)\n", point.x, point.y, calibratedPoint.x, calibratedPoint.y);
 
+#ifdef USE_EYECONTROL
         // Send to GazeHID
         SendGazeReportUm(calibratedPoint.x, calibratedPoint.y, 0);
+#endif
 
-        return coordinates;
+        return calibratedPoint;
     }
 
     void processFrame() {
@@ -226,7 +240,7 @@ public:
     int benchmark() {
         cv::Mat frame;
         std::vector<cv::Mat> roi_images;
-        std::vector<float> coordinates_XY;
+        cv::Point coordinates_XY;
         bool is_valid;
 
         // Measure latency over large number of samples
@@ -252,7 +266,7 @@ public:
     int benchmark2() {
         cv::Mat frame;
         std::vector<cv::Mat> roi_images;
-        std::vector<float> coordinates_XY;
+        cv::Point coordinates_XY;
         bool is_valid;
 
         // Measure latency over large number of samples
@@ -352,8 +366,6 @@ public:
         end = std::chrono::steady_clock::now();
         int avgFaceDetectionLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
 
-
-
         // Landmark detection
         begin = std::chrono::steady_clock::now();
         for (int i = 0; i < numTests; i++)
@@ -362,7 +374,6 @@ public:
         }
         end = std::chrono::steady_clock::now();
         int avgLandmarkDetectionLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
-
 
         // Generate face eye images
         begin = std::chrono::steady_clock::now();

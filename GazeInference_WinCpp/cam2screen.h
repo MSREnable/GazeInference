@@ -9,11 +9,11 @@ std::map<std::string, float> deviceMetrics = {  {"xCameraToScreenDisplacementInC
                                                 {"ppi", 267}
                                             };
 
-cv::Point cam2screen(float xDisplacementFromCameraInCm,
-                float yDisplacementFromCameraInCm,
-                int widthScreenInPoints,
-                int heightScreenInPoints)
+cv::Point cam2screen(cv::Point predictedPoint, int widthScreenInPoints, int heightScreenInPoints)
 {
+    
+    float xDisplacementFromCameraInCm = predictedPoint.x;
+    float yDisplacementFromCameraInCm = predictedPoint.y;
 
     float xCameraToScreenDisplacementInCm = deviceMetrics["xCameraToScreenDisplacementInCm"];
     float yCameraToScreenDisplacementInCm = deviceMetrics["yCameraToScreenDisplacementInCm"];
