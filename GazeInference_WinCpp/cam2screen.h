@@ -2,8 +2,6 @@
 #include "framework.h"
 #include <fstream>
 
-//std::ifstream devices("device_metrics_sku.json", std::ifstream::binary);
-
 std::map<std::string, float> deviceMetrics = {  {"xCameraToScreenDisplacementInCm", 13.0},
                                                 {"yCameraToScreenDisplacementInCm", 0.6},
                                                 {"widthScreenInCm", 26.0},

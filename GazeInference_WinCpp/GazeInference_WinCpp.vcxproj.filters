@@ -33,9 +33,6 @@
     <ClInclude Include="Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mnist.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="logging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -58,9 +55,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LiveCapture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SqueezeNet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UltraFaceNet.h">
@@ -128,9 +122,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\SqueezeNet.onnx">
-      <Filter>assets</Filter>
-    </None>
     <None Include="assets\shape_predictor_68_face_landmarks.dat">
       <Filter>assets</Filter>
     </None>
@@ -144,30 +135,10 @@
       <Filter>assets</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="device_metrics_sku.json">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\itracker_MSR_rc_1_0113.onnx">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\itracker_MSR_rc_adam_0_9171.onnx">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\best_checkpoint_MSR_0_78636.onnx">
-      <Filter>assets</Filter>
-    </None>
     <None Include="..\libraries\Release\EyeGazeIoctlLibrary.dll" />
     <None Include="..\libraries\Release\opencv_world451.dll" />
-    <None Include="assets\best_checkpoint_MSR_DEN_0_9992.onnx">
-      <Filter>assets</Filter>
-    </None>
     <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\onnxruntime.dll" />
     <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\custom_op_library.dll" />
     <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\DirectML.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="assets\Labels.txt">
-      <Filter>assets</Filter>
-    </Text>
   </ItemGroup>
 </Project>

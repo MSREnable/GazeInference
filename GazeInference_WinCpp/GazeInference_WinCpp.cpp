@@ -8,7 +8,6 @@
 #include "SqueezeNet.h"
 #include "UltraFaceNet.h"
 
-
 #define MAX_LOADSTRING 100
 #define DEFAULT_VIDEO_WIDTH 300
 #define DEFAULT_VIDEO_HEIGHT 300
@@ -26,15 +25,15 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 
 FrameCapture* g_pFrameCapture = NULL;
-//const wchar_t* modelFilepath = L"assets/best_checkpoint_MSR_0_78636.onnx";
-//const wchar_t* modelFilepath = L"assets/best_checkpoint_MSR_DEN_0_9992.onnx";
-const wchar_t* modelFilepath = L"assets/best_checkpoint_JS_1_0225.onnx";
+const wchar_t* modelFilepath = L"assets/itracker.onnx";
 const wchar_t* labelFilepath = NULL;
 std::unique_ptr<ITrackerModel> model;
 
 std::unique_ptr<ITrackerModel> OnCreate(HWND hwnd);
 void OnPaint(HWND hwnd);
 void OnChar(HWND hwnd, wchar_t c);
+
+typedef int(__cdecl* MYPROC)(LPWSTR);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -50,7 +49,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// Initialize COM
 	if (FAILED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
 	{
-		//Msg(TEXT("CoInitialize Failed!\r\n"));
 		exit(1);
 	}
 
@@ -70,8 +68,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAZEINFERENCEWINCPP));
 
+	
+	HINSTANCE hinstLib;
+	MYPROC ProcAdd;
+	BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
 	MSG msg;
-
 
 	// Main message loop:
 	while (GetMessage(&msg, nullptr, 0, 0))
@@ -162,20 +163,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		model = OnCreate(hWnd);
-		/*g_pFrameCapture = new (std::nothrow) FrameCapture(hWnd);
-		if (!g_pFrameCapture)
-			return -1;
-		else {
-			g_pFrameCapture->OnCreate();
-			g_pFrameCapture->OnChooseDevice();
-			return 0;
-		}*/
 		break;
 
 	case WM_PAINT:
 		ShowWindow(hWnd, SW_SHOWMINIMIZED);
 		OnPaint(hWnd);
-		//g_pFrameCapture->OnPaint();
 		break;
 
 	case WM_CLOSE:// Close(X) button;
@@ -186,8 +178,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		// Hide the main window while the graph is destroyed
 		ShowWindow(hWnd, SW_HIDE);
-		//g_pFrameCapture->OnClose();
-		//delete g_pFrameCapture;
 		PostQuitMessage(0);
 		break;
 
@@ -218,14 +208,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 	case WM_SIZE:
-		//g_pFrameCapture->OnSize();
 		break;
 
 	case WM_WINDOWPOSCHANGED:
 		break;
 
 	case WM_DEVICECHANGE:
-		//g_pFrameCapture->OnDeviceLost((PDEV_BROADCAST_HDR)lParam);
 		return TRUE;
 
 	case WM_ERASEBKGND:
@@ -257,10 +245,6 @@ void OnPaint(HWND hWnd)
 	model->initCamera();
 	model->runInference();
 
-	//model->initCamera();
-	//model->benchmark2();
-	//model->benchmark_dlib();
-
 	EndPaint(hWnd, &ps);
 }
 
@@ -274,18 +258,9 @@ void OnChar(HWND hWnd, wchar_t c)
 
 	case L'p':
 	case L'P':
-		//if (g_pFrameCapture->State() == Running)
-		//{
-		//	g_pFrameCapture->ChangePreviewState(0);//Pause
-		//}
-		//else
-		//{	
-		//	g_pFrameCapture->ChangePreviewState(1);//Play
-		//}
 		break;
 	case L'c':
 	case L'C':
-		//model->addCalibrationPoint();
 		break;
 	}
 }

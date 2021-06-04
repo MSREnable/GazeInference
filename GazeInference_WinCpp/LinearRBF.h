@@ -15,7 +15,7 @@ namespace GazeInference_WinCpp
 	{
 	public:
 
-		LinearRBF(int maxHistory = LINEARRBF_MAXHISTORY_DEFAULT, float screenQuantizationFactor = 0.1f) : _c(0), _g(0)
+		LinearRBF(int maxHistory = LINEARRBF_MAXHISTORY_DEFAULT, float screenQuantizationFactor = 0.01f) : _c(0), _g(0)
 		{
 			_anchorTranslationCount = 0;
 

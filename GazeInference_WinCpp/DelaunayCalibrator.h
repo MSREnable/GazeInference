@@ -1,11 +1,12 @@
 #pragma once
 #include "framework.h";
-#include "Calibrator.h"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <vector>
 #include <fstream>
+#include "Calibrator.h"
+
 
 template <typename T>
 std::vector<T> selectIndices(std::vector<T> vec, std::vector<int> indices)
@@ -23,10 +24,6 @@ void extend(std::vector<T>& vector1, std::vector<T>& vector2) {
 
 class DelaunayCalibrator : public Calibrator {
 private:
-    //cv::Rect rect;
-    //std::vector<cv::Point2f> actual_coordinates;
-    //std::vector<cv::Point2f> predicted_coordinates;
-
     cv::Rect img_rect;
     cv::Subdiv2D actualMesh;
     cv::Subdiv2D predictedMesh;
@@ -41,6 +38,77 @@ public:
     DelaunayCalibrator(cv::Rect rect) {
         initDelaunaySpace(rect, this->margin);
         this->add(this->default_coordinates, this->default_coordinates, false);
+    }
+    ~DelaunayCalibrator() {}
+
+    void reset() override final {
+        this->actual_coordinates = std::vector<cv::Point2f>();
+        this->predicted_coordinates = std::vector<cv::Point2f>();
+        this->actualMesh = cv::Subdiv2D(this->rect);
+        this->predictedMesh = cv::Subdiv2D(this->rect);
+    }
+
+    void add(cv::Point2f actualCoordinate, cv::Point2f predictedCoordinate, bool remap = true) override final {
+        // Convert to Delaunay Space
+        if (remap) {
+            actualCoordinate = InputToDelaunay(actualCoordinate);
+            predictedCoordinate = InputToDelaunay(predictedCoordinate);
+        }
+        actualCoordinate = limitXY(actualCoordinate);
+        predictedCoordinate = limitXY(predictedCoordinate);
+
+        this->actual_coordinates.push_back(actualCoordinate);
+        this->predicted_coordinates.push_back(predictedCoordinate);
+        this->actualMesh.insert(actualCoordinate);
+        this->predictedMesh.insert(predictedCoordinate);
+    }
+
+    void add(std::vector<cv::Point2f> actualCoordinates, std::vector<cv::Point2f> predictedCoordinates, bool remap = true) override final {
+        // Convert to Delaunay Space
+        if (remap) {
+            actualCoordinates = InputToDelaunay(actualCoordinates);
+            predictedCoordinates = InputToDelaunay(predictedCoordinates);
+        }
+        actualCoordinates = limitXY(actualCoordinates);
+        predictedCoordinates = limitXY(predictedCoordinates);
+
+        // Add to the coordinate vector
+        extend(this->actual_coordinates, actualCoordinates);
+        extend(this->predicted_coordinates, predictedCoordinates);
+        // Add to the vector
+        this->actualMesh.insert(actualCoordinates);
+        this->predictedMesh.insert(predictedCoordinates);
+    }
+
+    cv::Point2f evaluate(cv::Point2f searchPoint) override final {
+        if (this->actual_coordinates.size() <= 3)
+            return searchPoint;
+
+        // Map to Delaunay space
+        searchPoint = InputToDelaunay(searchPoint);
+        cv::Vec6f t = findTriangle(searchPoint, this->predictedMesh);
+
+        std::vector<cv::Point2f> predicted_vertices = getTriangleVertices(t);
+        std::vector<int> predicted_vertices_indices = findIndices(this->predicted_coordinates, predicted_vertices);
+        std::vector<cv::Point2f> actual_vertices = selectIndices(this->actual_coordinates, predicted_vertices_indices);
+        cv::Mat M = cv::getAffineTransform(predicted_vertices, actual_vertices);
+
+        std::vector<cv::Point2f> calibrated_vector;
+        cv::transform(std::vector<cv::Point2f>{ searchPoint }, calibrated_vector, M);
+        //LOG_DEBUG("########## %d ###########", this->actual_coordinates.size());
+        return DelaunayToInput(calibrated_vector[0]);
+    }
+
+    // Fix problem with img creation
+    void drawDistortionMap() override final {
+        // Keep the image size small
+        cv::Mat img(img_rect.size(), CV_8UC3);
+        img = cv::Scalar::all(0);
+        //cv::Mat img = cv::Mat(cv::Size(this->rect.width, this->rect.height), CV_32FC3);
+        drawDelaunay(img, this->actualMesh, cv::Scalar(0, 255, 0) /*Green*/);
+        drawDelaunay(img, this->predictedMesh, cv::Scalar(255, 0, 0)/*Blue*/);
+        cv::imshow("DelaunayDistortionMap", img);
+        cv::waitKey(1);
     }
 
     void initDelaunaySpace(cv::Rect rect, float margin=0.10) {
@@ -64,13 +132,6 @@ public:
         this->img_rect = cv::Rect(0, 0, this->rect.width * ratio, this->rect.height * ratio);
     }
 
-    void reset() {
-        this->actual_coordinates = std::vector<cv::Point2f>();
-        this->predicted_coordinates = std::vector<cv::Point2f>();
-        this->actualMesh = cv::Subdiv2D(this->rect);
-        this->predictedMesh = cv::Subdiv2D(this->rect);
-    }
-
     std::vector<cv::Point2f> InputToDelaunay(std::vector<cv::Point2f> in_vector) {
         // Map to Delaunay space
         std::vector<cv::Point2f> out_vector;
@@ -88,38 +149,6 @@ public:
     cv::Point2f DelaunayToInput(cv::Point2f point) {
         // Map to Input space
         return cv::Point2f(point.x - this->orig.x * this->margin, point.y - this->orig.y * this->margin);
-    }
-
-    void add(cv::Point2f actualCoordinate, cv::Point2f predictedCoordinate, bool remap = true) {
-        // Convert to Delaunay Space
-        if (remap) {
-            actualCoordinate = InputToDelaunay(actualCoordinate);
-            predictedCoordinate = InputToDelaunay(predictedCoordinate);
-        }
-        actualCoordinate = limitXY(actualCoordinate);
-        predictedCoordinate = limitXY(predictedCoordinate);
-
-        this->actual_coordinates.push_back(actualCoordinate);
-        this->predicted_coordinates.push_back(predictedCoordinate);
-        this->actualMesh.insert(actualCoordinate);
-        this->predictedMesh.insert(predictedCoordinate);
-    }
-
-    void add(std::vector<cv::Point2f> actualCoordinates, std::vector<cv::Point2f> predictedCoordinates, bool remap = true) {
-        // Convert to Delaunay Space
-        if (remap) {
-            actualCoordinates = InputToDelaunay(actualCoordinates);
-            predictedCoordinates = InputToDelaunay(predictedCoordinates);
-        }
-        actualCoordinates = limitXY(actualCoordinates);
-        predictedCoordinates = limitXY(predictedCoordinates);
-
-        // Add to the coordinate vector
-        extend(this->actual_coordinates, actualCoordinates);
-        extend(this->predicted_coordinates, predictedCoordinates);
-        // Add to the vector
-        this->actualMesh.insert(actualCoordinates);
-        this->predictedMesh.insert(predictedCoordinates);
     }
 
     std::vector<cv::Point2d> convertToInt(std::vector<cv::Point2f> data) {
@@ -153,28 +182,6 @@ public:
         cv::Subdiv2D mesh = cv::Subdiv2D(this->rect);
         mesh.insert(coordinates);
         return mesh;
-    }
-
-    cv::Point2f evaluate(cv::Point2f searchPoint) {
-        if (this->actual_coordinates.size() > 3) {
-            // Map to Delaunay space
-            searchPoint = InputToDelaunay(searchPoint);
-            cv::Vec6f t = findTriangle(searchPoint, this->predictedMesh);
-
-            std::vector<cv::Point2f> predicted_vertices = getTriangleVertices(t);
-            std::vector<int> predicted_vertices_indices = findIndices(this->predicted_coordinates, predicted_vertices);
-            std::vector<cv::Point2f> actual_vertices = selectIndices(this->actual_coordinates, predicted_vertices_indices);
-            cv::Mat M = cv::getAffineTransform(predicted_vertices, actual_vertices);
-
-            std::vector<cv::Point2f> calibrated_vector;
-            cv::transform(std::vector<cv::Point2f>{ searchPoint }, calibrated_vector, M);
-            LOG_DEBUG("########## %d ###########", this->actual_coordinates.size());
-            return DelaunayToInput(calibrated_vector[0]);
-        }
-        else {
-            return searchPoint;
-        }
-        
     }
 
     std::vector<cv::Point2f> getTriangleVertices(cv::Vec6f &triangle, float ratio=1.0f) {
@@ -268,17 +275,7 @@ public:
         return (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y);
     }
 
-    // Fix problem with img creation
-    void drawDistortionMap(){
-        // Keep the image size small
-        cv::Mat img(img_rect.size(), CV_8UC3);
-        img = cv::Scalar::all(0);
-        //cv::Mat img = cv::Mat(cv::Size(this->rect.width, this->rect.height), CV_32FC3);
-        drawDelaunay(img, this->actualMesh, cv::Scalar(0, 255, 0) /*Green*/);
-        drawDelaunay(img, this->predictedMesh, cv::Scalar(255, 0, 0)/*Blue*/);
-        cv::imshow("DelaunayDistortionMap", img);
-        cv::waitKey(1);
-    }
+
 
     // Draw delaunay triangles
     void drawDelaunay(cv::Mat img, cv::Subdiv2D mesh, cv::Scalar color){
@@ -322,17 +319,9 @@ public:
     //    //load();
     //}
 
-    void save() {
-        const wchar_t* calibrationModelPath = L"assets/calibrationModel.txt";
-        this->serialize(calibrationModelPath);
-    }
 
-    void load() {
-        const wchar_t* calibrationModelPath = L"assets/calibrationModel.txt";
-        this->deserialize(calibrationModelPath);
-    }
 
-    bool serialize(const wchar_t* path) const {
+    bool serialize(const wchar_t* path) override final {
 
         std::ofstream out(path);
 
@@ -364,7 +353,7 @@ public:
         return true;
     }
 
-    bool deserialize(const wchar_t* path) {
+    bool deserialize(const wchar_t* path) override final {
 
         std::ifstream in(path);
 

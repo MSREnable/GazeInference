@@ -59,10 +59,11 @@ private:
     const int SKIP_FRAMES = 3;
     const int blurring = BLURRING::HIGH;
     
-    int detector_type = DETECTOR_TYPE::ULTRA_FACE_SLIM;//ULTRA_FACE_SLIM, ULTRA_FACE
+    int detector_type = DETECTOR_TYPE::ULTRA_FACE_SLIM;
     int frame_count = 0;
     std::vector<dlib::rectangle> face_rectangles;
     std::unique_ptr<UltraFaceNet> ultraFaceNet;
+    //std::unique_ptr<LandmarksDetection> perception_detector;
 
 public:
     DlibFaceDetector() {
@@ -114,7 +115,6 @@ public:
             cv::cvtColor(inputImage, downsampledImage, cv::COLOR_BGR2GRAY);
             cv::resize(downsampledImage, downsampledImage, cv::Size(), 1.0 / downscaling.width, 1.0 / downscaling.height);
             dlib::cv_image<unsigned char> downsampledImage_dlib(downsampledImage);
-            /*dlib::cv_image<dlib::bgr_pixel> downsampledImage_dlib(downsampledImage);*/
 
             face_rectangles = detector(downsampledImage_dlib);
             //frame_count = 0; //reset frame count 
@@ -196,7 +196,6 @@ public:
     bool check_negative_coordinates(cv::RotatedRect) {
         return true;
     }
-
 
     cv::Size makeSquare(cv::Size size) {
         float length = std::max(size.height, size.width);
@@ -307,7 +306,6 @@ public:
         auto angle = rotatedRect.angle;
         auto size = makeSquare(rotatedRect.size); // get a square crop of the detected region 
         auto center = rotatedRect.center;
-        // TODO: Remove 10px padding from the training pipeline 
 
         // get size of image
         int height = img.size().height;
@@ -483,14 +481,6 @@ public:
             for (int i = 0; i < 4; i++) {
                 cv::line(image, vertices2f[i], vertices2f[(i + 1) % 4], BLUE, 2);
             }
-
-            //// Convert them so we can use them in a fillConvexPoly
-            //cv::Point vertices[4];
-            //for (int i = 0; i < 4; ++i) {
-            //    vertices[i] = vertices2f[i];
-            //}
-            //// Now we can fill the rotated rectangle with our specified color
-            //cv::fillConvexPoly(webcamImage, vertices2f, 4, BLUE);
         }
         return image;
     }

@@ -2,7 +2,6 @@
 #include "Model.h"
 #include "DlibFaceDetector.h"
 #include "LiveCapture.h"
-#include "DelaunayCalibrator.h"
 #include "EyeGazeIoctlLibrary.h"
 #pragma comment(lib, "EyeGazeIoctlLibrary.lib")
 #include "cam2screen.h"
@@ -10,6 +9,7 @@
 #include <chrono>
 #include <ctime>
 #include "LinearRBFCalibrator.h"
+#include "DelaunayCalibrator.h"
 
 
 // ITracker Model
@@ -20,8 +20,8 @@ private:
     std::tuple<std::string, float> result = std::tuple<std::string, float>("Unknown", 0.0f);
     std::unique_ptr<LiveCapture> live_capture;
     std::unique_ptr<DlibFaceDetector> detector;
-    //std::unique_ptr<DelaunayCalibrator> calibrator;
-    std::unique_ptr<LinearRBFCalibrator> calibrator;
+    std::unique_ptr<Calibrator> calibrator;
+    int calibration_type = CALIBRATION_TYPE::DELAUNAY;
 
     std::chrono::steady_clock::time_point epoch;
     double timestamp_ms = -1;
@@ -73,9 +73,13 @@ public:
     void initCalibrator() {
         // Screen size (can use desktopRect as well)
         cv::Rect rect = cv::Rect(0, 0, screenWidth, screenHeight);
-        //calibrator = std::make_unique<DelaunayCalibrator>(rect);
-        calibrator = std::make_unique<LinearRBFCalibrator>(rect);
-        //calibrator->load();
+        if (this->calibration_type == CALIBRATION_TYPE::LINEAR_RBF) {
+            this->calibrator = std::make_unique<LinearRBFCalibrator>(rect);
+        }
+        else if(this->calibration_type == CALIBRATION_TYPE::DELAUNAY) {
+            this->calibrator = std::make_unique<DelaunayCalibrator>(rect);
+        }
+        //this->calibrator->load();
     }
 
     bool getFrameFromImagePath(std::string imageFilepath) {
@@ -120,10 +124,6 @@ public:
         return true;
     }
 
-    //void addCalibrationPoint() {
-    //    this->updateMesh = true;
-    //}
-
     std::vector<float> processOutput() {
         std::vector<float> coordinates = outputs[0].values;
         float x = coordinates[0];
@@ -146,22 +146,55 @@ public:
 
         cv::Point calibratedPoint;
 
-        // VK_LBUTTON, VK_RBUTTON
-        // Right button Down
-        if (GetAsyncKeyState(VK_RBUTTON) != 0){
-            // collect more data points for calibration
-            calibrator->add(cv::Point(xMouse, yMouse), point);
-            //this->updateMesh = false;
+
+
+        // #define VK_LEFT, VK_UP, VK_RIGHT, VK_DOWN
+        if (this->calibrator->isActive()) {
+            // Disable
+            if (GetAsyncKeyState(VK_LEFT) != 0) {
+                this->calibrator->setActive(false);
+            }
+
+            // Add new point (Right button Down)
+            if (GetAsyncKeyState(VK_RBUTTON) != 0) {
+                // collect more data points for calibration
+                this->calibrator->add(cv::Point(xMouse, yMouse), point);
+
+                //this->updateMesh = false;
+            }
+
+            // Save Calibration model (down button)
+            if (GetAsyncKeyState(VK_DOWN) != 0) {
+                this->calibrator->save();
+            }
+
+            // Load Calibration model (up button Down)
+            if (GetAsyncKeyState(VK_UP) != 0) {
+                this->calibrator->load();
+            }
+
+            // Reset Calibration model (Delete button)
+            if (GetAsyncKeyState(VK_DELETE) != 0) {
+                this->calibrator->reset();
+            }
+        }
+        else { // Optionas: Enable Calibration
+            if (GetAsyncKeyState(VK_RIGHT) != 0) {
+                this->calibrator->setActive(true);
+            }
         }
 
-        if (GetAsyncKeyState(VK_LBUTTON) != 0) {
-            calibrator->save();
-        }
 
-        // Calibrate for distortion
-        calibratedPoint = calibrator->evaluate(point);
-        LOG_DEBUG("Mouse (%d, %d) | Predicted (%d, %d) | Calibrated (%d, %d)\n", xMouse, yMouse, point.x, point.y, calibratedPoint.x, calibratedPoint.y);
-        calibrator->drawDistortionMap();
+        if (this->calibrator->isActive()) {
+            // Calibrate for distortion
+            calibratedPoint = this->calibrator->evaluate(point);
+            LOG_DEBUG("Mouse (%d, %d) | Predicted (%d, %d) | Calibrated (%d, %d)\n", xMouse, yMouse, point.x, point.y, calibratedPoint.x, calibratedPoint.y);
+            this->calibrator->drawDistortionMap();
+        }
+        else {
+            calibratedPoint = point;
+            LOG_DEBUG("Mouse (%d, %d) | Predicted (%d, %d) | Calibrated (%d, %d)\n", xMouse, yMouse, point.x, point.y, calibratedPoint.x, calibratedPoint.y);
+        }
 
         // Send to GazeHID
         SendGazeReportUm(calibratedPoint.x, calibratedPoint.y, 0);
@@ -350,5 +383,3 @@ public:
     }
 
 };
-
-
