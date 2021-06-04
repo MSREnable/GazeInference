@@ -1,0 +1,9 @@
+namespace GazeInference_UWP_Cpp
+{
+    [default_interface]
+    runtimeclass MainPage : Windows.UI.Xaml.Controls.Page
+    {
+        MainPage();
+        Int32 MyProperty;
+    }
+}
