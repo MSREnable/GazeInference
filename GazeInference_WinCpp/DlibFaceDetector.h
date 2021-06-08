@@ -1,4 +1,5 @@
 #pragma once
+#include "framework.h"
 #include <dlib/opencv.h> 
 #include <dlib/image_processing.h>
 #include <dlib/image_processing/frontal_face_detector.h>

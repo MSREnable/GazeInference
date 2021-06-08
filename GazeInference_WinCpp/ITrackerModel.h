@@ -40,6 +40,7 @@ private:
     int screenWidth = GetPrimaryMonitorWidthUm();
     int screenHeight = GetPrimaryMonitorHeightUm();
 #else
+    // Depends upon windows.h
     int screenWidth = GetSystemMetrics(SM_CXSCREEN);
     int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 #endif

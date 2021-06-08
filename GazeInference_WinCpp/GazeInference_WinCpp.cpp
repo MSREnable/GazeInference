@@ -26,6 +26,8 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 FrameCapture* g_pFrameCapture = NULL;
 const wchar_t* modelFilepath = L"assets/itracker.onnx";
+
+
 const wchar_t* labelFilepath = NULL;
 std::unique_ptr<ITrackerModel> model;
 

@@ -135,10 +135,5 @@
       <Filter>assets</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="..\libraries\Release\EyeGazeIoctlLibrary.dll" />
-    <None Include="..\libraries\Release\opencv_world451.dll" />
-    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\onnxruntime.dll" />
-    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\custom_op_library.dll" />
-    <None Include="..\libraries\onnxruntime-win-x64-dml-1.6.0\lib\DirectML.dll" />
   </ItemGroup>
 </Project>
