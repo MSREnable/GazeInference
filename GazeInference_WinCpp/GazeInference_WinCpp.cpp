@@ -168,7 +168,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_PAINT:
-		ShowWindow(hWnd, SW_SHOWMINIMIZED);
 		OnPaint(hWnd);
 		break;
 
@@ -243,9 +242,21 @@ void OnPaint(HWND hWnd)
 	HDC hdc = BeginPaint(hWnd, &ps);
 	// TODO: Add any drawing code that uses hdc here...
 
-	// Working iTracker model inference to generate (x,y) coordinates
-	model->initCamera();
-	model->runInference();
+	/* The following line of code fills the update region with a single color, 
+	* using the system - defined window background color(COLOR_WINDOW). The 
+	* actual color indicated by COLOR_WINDOW depends on the user's current color 
+	* scheme.
+	*/
+	FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
+	/* Initialize capture and run inference */
+	if (!model->isActive()) {
+		// Minimize the window by default
+		ShowWindow(hWnd, SW_SHOWMINIMIZED);
+		// Working iTracker model inference to generate (x,y) coordinates
+		model->initCamera();
+		model->runInference();
+	}
 
 	EndPaint(hWnd, &ps);
 }

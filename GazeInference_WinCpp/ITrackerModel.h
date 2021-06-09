@@ -57,6 +57,10 @@ public:
         // Cleanup 
     }
 
+    bool isActive() {
+        return (live_capture && live_capture->is_open() && detector);
+    }
+
     bool initCamera() {
 
         // Initialize face ROI/landmark detector
@@ -66,7 +70,7 @@ public:
         InitializeEyeGaze();
 #endif
         
-        // Initialize live capture
+        // Initialize live capture and open live stream
         live_capture = std::make_unique<LiveCapture>();
         live_capture->open();
 
@@ -79,7 +83,7 @@ public:
         xMonitorRatio = (FLOAT)screenWidth / (FLOAT)desktopRect.right;
         yMonitorRatio = (FLOAT)screenHeight / (FLOAT)desktopRect.bottom;
 
-        return ( live_capture && detector);
+        return isActive();
     }
 
     void initCalibrator() {
