@@ -5,7 +5,6 @@
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/gui_widgets.h>
 #include <dlib/image_io.h>
-#pragma comment(lib, "dlib19.21.0.lib") 
 #include "UltraFaceNet.h"
 
 template <typename T>
