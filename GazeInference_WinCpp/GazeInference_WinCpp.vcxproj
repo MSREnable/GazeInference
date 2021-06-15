@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.6.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.6.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" />
-  <Import Project="..\packages\Microsoft.AI.DirectML.1.4.0\build\Microsoft.AI.DirectML.props" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.4.0\build\Microsoft.AI.DirectML.props')" />
-  <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.6.0\build\native\Microsoft.ML.OnnxRuntime.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.6.0\build\native\Microsoft.ML.OnnxRuntime.props')" />
-  <Import Project="..\packages\DlibDotNet.19.21.0.20210302\build\DlibDotNet.props" Condition="Exists('..\packages\DlibDotNet.19.21.0.20210302\build\DlibDotNet.props')" />
+  <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props')" />
+  <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" />
+  <Import Project="..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -65,6 +64,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+	<VcpkgConfiguration>Release</VcpkgConfiguration>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -72,6 +72,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+	<VcpkgConfiguration>Release</VcpkgConfiguration>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -92,6 +93,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+	<VcpkgConfiguration>Release</VcpkgConfiguration>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -99,6 +101,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+	<VcpkgConfiguration>Release</VcpkgConfiguration>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -145,23 +148,23 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21\examples\build\dlib_build\Debug;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary\x64\Debug;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
+    <LibraryPath>..\GazeHid\EyeGazeIoctlLibrary\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\jashar\source\repos\MSREnable\GazeHid\x64\Release;C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21\examples\build\dlib_build\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
+    <LibraryPath>..\GazeHid\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\jashar\source\repos\MSREnable\GazeHid\x64\Release;C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21\examples\build\dlib_build\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
+    <LibraryPath>..\GazeHid\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\jashar\source\repos\MSREnable\GazeHid\x64\Release;C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21\examples\build\dlib_build\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
+    <LibraryPath>..\GazeHid\x64\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -229,12 +232,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\jashar\source\repos\MSREnable\GazeHid\x64\Debug;C:\ExternalLibraries\opencv\build\x64\vc15\lib;C:\ExternalLibraries\onnxruntime-win-x64-1.6.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\GazeHid\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>onnxruntime.lib;opencv_world451d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -246,7 +249,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -267,7 +270,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -289,7 +292,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;C:\Users\jashar\source\repos\MSREnable\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -339,6 +342,7 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\README.md" />
     <None Include="assets\itracker.onnx">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
     </None>
@@ -355,24 +359,21 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\DlibDotNet.19.21.0.20210302\build\DlibDotNet.targets" Condition="Exists('..\packages\DlibDotNet.19.21.0.20210302\build\DlibDotNet.targets')" />
-    <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.6.0\build\native\Microsoft.ML.OnnxRuntime.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.6.0\build\native\Microsoft.ML.OnnxRuntime.targets')" />
-    <Import Project="..\packages\Microsoft.AI.DirectML.1.4.0\build\Microsoft.AI.DirectML.targets" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.4.0\build\Microsoft.AI.DirectML.targets')" />
-    <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.6.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.6.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" />
     <Import Project="..\packages\OpenCV-Release.4.5.1\build\native\openCV-Release.targets" Condition="Exists('..\packages\OpenCV-Release.4.5.1\build\native\openCV-Release.targets')" />
+    <Import Project="..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets')" />
+    <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" />
+    <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\DlibDotNet.19.21.0.20210302\build\DlibDotNet.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DlibDotNet.19.21.0.20210302\build\DlibDotNet.props'))" />
-    <Error Condition="!Exists('..\packages\DlibDotNet.19.21.0.20210302\build\DlibDotNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DlibDotNet.19.21.0.20210302\build\DlibDotNet.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.1.6.0\build\native\Microsoft.ML.OnnxRuntime.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.1.6.0\build\native\Microsoft.ML.OnnxRuntime.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.1.6.0\build\native\Microsoft.ML.OnnxRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.1.6.0\build\native\Microsoft.ML.OnnxRuntime.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.4.0\build\Microsoft.AI.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.4.0\build\Microsoft.AI.DirectML.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.4.0\build\Microsoft.AI.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.4.0\build\Microsoft.AI.DirectML.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.6.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.6.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.6.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.6.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets'))" />
     <Error Condition="!Exists('..\packages\OpenCV-Release.4.5.1\build\native\openCV-Release.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Release.4.5.1\build\native\openCV-Release.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets'))" />
   </Target>
 </Project>
