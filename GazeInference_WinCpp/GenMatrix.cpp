@@ -6,7 +6,7 @@
 * Enlistment dir:          os\src\multimedia\Photos\RawCodec\EngineLib\Effects\GenMatrix.cpp
 */
 
-#include "pch.h"  
+#include "framework.h"
 #include <math.h>  
 #include "GenMatrix.h"  
 

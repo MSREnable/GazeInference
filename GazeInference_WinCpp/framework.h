@@ -63,7 +63,6 @@
 
 // ONNX
 #include <onnxruntime_cxx_api.h>
-#pragma comment(lib, "onnxruntime.lib")
 
 
 // OpenCV
@@ -71,7 +70,7 @@
 #include <opencv2/highgui/highgui_c.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-#pragma comment(lib, "opencv_world451.lib")
+
 
 // Custom Headers
 #include "logging.h"
