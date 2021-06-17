@@ -1,0 +1,3 @@
+[submodule "GazeHid"]
+	path = GazeHid
+	url = https://github.com/MSREnable/GazeHid
