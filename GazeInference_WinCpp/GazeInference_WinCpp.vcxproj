@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\OpenCV-Native.4.5.1.1\build\native\OpenCV-Native.props" Condition="Exists('..\packages\OpenCV-Native.4.5.1.1\build\native\OpenCV-Native.props')" />
+  <Import Project="..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props" Condition="Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props')" />
+  <Import Project="..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props')" />
   <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props')" />
   <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" />
   <Import Project="..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props')" />
@@ -139,7 +140,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\jashar\source\repos\GazeInference\libraries\dlib-19.21;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -363,7 +363,8 @@
     <Import Project="..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets')" />
     <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" />
     <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets')" />
-    <Import Project="..\packages\OpenCV-Native.4.5.1.1\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.1.1\build\native\OpenCV-Native.targets')" />
+    <Import Project="..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets" Condition="Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets')" />
+    <Import Project="..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -375,7 +376,9 @@
     <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.0\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets'))" />
-    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.1.1\build\native\OpenCV-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.1.1\build\native\OpenCV-Native.props'))" />
-    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.1.1\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.1.1\build\native\OpenCV-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props'))" />
+    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props'))" />
+    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets'))" />
   </Target>
 </Project>
