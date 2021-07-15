@@ -1,12 +1,13 @@
 #pragma once
 #include "Model.h"
-#include "DlibFaceDetector.h"
+#include "FaceDetector.h"
 #include "LiveCapture.h"
 #include "cam2screen.h"
 #include <chrono>
 #include <ctime>
 #include "LinearRBFCalibrator.h"
 #include "DelaunayCalibrator.h"
+
 
 
 #ifdef USE_EYECONTROL
@@ -22,7 +23,7 @@ private:
     cv::Mat frame;
     std::tuple<std::string, float> result = std::tuple<std::string, float>("Unknown", 0.0f);
     std::unique_ptr<LiveCapture> live_capture;
-    std::unique_ptr<DlibFaceDetector> detector;
+    std::unique_ptr<AbstractFaceDetector> detector;
     std::unique_ptr<Calibrator> calibrator;
     int calibration_type = CALIBRATION_TYPE::DELAUNAY;
 
@@ -64,7 +65,12 @@ public:
     bool initCamera() {
 
         // Initialize face ROI/landmark detector
-        detector = std::make_unique<DlibFaceDetector>();
+#ifdef USE_CUSTOM_API
+        detector = std::make_unique<CustomFaceDetector>();
+#else
+        detector = std::make_unique<DefaultFaceDetector>();
+        //detector = std::make_unique<TwoStageFaceDetector>();
+#endif
 
 #ifdef USE_EYECONTROL
         InitializeEyeGaze();
@@ -124,7 +130,7 @@ public:
     bool applyTransformations() {
         // Apply ROI Extraction through dlib
         // frame in BGR and roi_frames YCbCr
-        std::vector<cv::Mat> roi_frames = detector->ROIExtraction(frame, live_capture->downscaling);
+        std::vector<cv::Mat> roi_frames = detector->extractRegionsOfInterest(frame, live_capture->downscaling);
 
         if (roi_frames.size() != 4) {
             return false;
@@ -336,70 +342,70 @@ public:
         return avgLatency_ms;
     }
 
-    int benchmark_dlib() {
-        std::vector<cv::Mat> roi_images;
-        bool is_valid;
-        std::vector<cv::Point2f> face_shape_vector;
-        std::vector<cv::RotatedRect> rectangles;
+    //int benchmark_dlib() {
+    //    std::vector<cv::Mat> roi_images;
+    //    bool is_valid;
+    //    std::vector<cv::Point2f> face_shape_vector;
+    //    std::vector<cv::RotatedRect> rectangles;
 
-        // Measure latency over large number of samples
-        int numTests{ 100 };
-        std::chrono::steady_clock::time_point begin;
-        std::chrono::steady_clock::time_point end;
-
-
-        // Load frame
-        getFrame(); //reads a new frame model->frame
-        
-
-        // Init dlib
-        std::unique_ptr<DlibFaceDetector> detector;
-        begin = std::chrono::steady_clock::now();
-        for (int i = 0; i < 5; i++)
-        {
-            if (detector)
-                detector.release();
-            detector = std::make_unique<DlibFaceDetector>();
-
-        }
-        end = std::chrono::steady_clock::now();
-        int avgDetectorInitLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(5);
+    //    // Measure latency over large number of samples
+    //    int numTests{ 100 };
+    //    std::chrono::steady_clock::time_point begin;
+    //    std::chrono::steady_clock::time_point end;
 
 
-        // Face Detection
-        begin = std::chrono::steady_clock::now();
-        for (int i = 0; i < numTests; i++)
-        {
-            is_valid = detector->find_primary_face_ultraFace(frame, face_shape_vector, live_capture->downscaling);
-        }
-        end = std::chrono::steady_clock::now();
-        int avgFaceDetectionLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
+    //    // Load frame
+    //    getFrame(); //reads a new frame model->frame
+    //    
 
-        // Landmark detection
-        begin = std::chrono::steady_clock::now();
-        for (int i = 0; i < numTests; i++)
-        {
-            is_valid = detector->landmarksToRects(face_shape_vector, rectangles);
-        }
-        end = std::chrono::steady_clock::now();
-        int avgLandmarkDetectionLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
+    //    // Init dlib
+    //    std::unique_ptr<DlibFaceDetector> detector;
+    //    begin = std::chrono::steady_clock::now();
+    //    for (int i = 0; i < 5; i++)
+    //    {
+    //        if (detector)
+    //            detector.release();
+    //        detector = std::make_unique<DlibFaceDetector>();
 
-        // Generate face eye images
-        begin = std::chrono::steady_clock::now();
-        for (int i = 0; i < numTests; i++)
-        {
-            detector->generate_face_eye_images(frame, rectangles, roi_images);
-        }
-        end = std::chrono::steady_clock::now();
-        int avgROICroppingLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
+    //    }
+    //    end = std::chrono::steady_clock::now();
+    //    int avgDetectorInitLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(5);
 
 
-        int avgLatency_ms = avgDetectorInitLatency_ms
-            + avgFaceDetectionLatency_ms
-            + avgLandmarkDetectionLatency_ms
-            + avgROICroppingLatency_ms;
+    //    // Face Detection
+    //    begin = std::chrono::steady_clock::now();
+    //    for (int i = 0; i < numTests; i++)
+    //    {
+    //        is_valid = detector->find_primary_face_ultraFace(frame, face_shape_vector, live_capture->downscaling);
+    //    }
+    //    end = std::chrono::steady_clock::now();
+    //    int avgFaceDetectionLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
 
-        return avgLatency_ms;
-    }
+    //    // Landmark detection
+    //    begin = std::chrono::steady_clock::now();
+    //    for (int i = 0; i < numTests; i++)
+    //    {
+    //        is_valid = detector->landmarksToRects(face_shape_vector, rectangles);
+    //    }
+    //    end = std::chrono::steady_clock::now();
+    //    int avgLandmarkDetectionLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
+
+    //    // Generate face eye images
+    //    begin = std::chrono::steady_clock::now();
+    //    for (int i = 0; i < numTests; i++)
+    //    {
+    //        detector->generate_face_eye_images(frame, rectangles, roi_images);
+    //    }
+    //    end = std::chrono::steady_clock::now();
+    //    int avgROICroppingLatency_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / static_cast<float>(numTests);
+
+
+    //    int avgLatency_ms = avgDetectorInitLatency_ms
+    //        + avgFaceDetectionLatency_ms
+    //        + avgLandmarkDetectionLatency_ms
+    //        + avgROICroppingLatency_ms;
+
+    //    return avgLatency_ms;
+    //}
 
 };

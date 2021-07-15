@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.props" Condition="Exists('..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.props')" />
   <Import Project="..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props" Condition="Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props')" />
   <Import Project="..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props')" />
   <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.props')" />
@@ -272,7 +273,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_CUSTOM_API" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -308,7 +309,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="cv_constants.h" />
     <ClInclude Include="DelaunayCalibrator.h" />
-    <ClInclude Include="DlibFaceDetector.h" />
+    <ClInclude Include="FaceDetector.h" />
     <ClInclude Include="FrameCapture.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GazeInference_WinCpp.h" />
@@ -365,6 +366,7 @@
     <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.0\build\native\Microsoft.ML.OnnxRuntime.targets')" />
     <Import Project="..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets" Condition="Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets')" />
     <Import Project="..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets')" />
+    <Import Project="..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.targets" Condition="Exists('..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -380,5 +382,7 @@
     <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets'))" />
     <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props'))" />
     <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.props'))" />
+    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.targets'))" />
   </Target>
 </Project>

@@ -3,6 +3,29 @@
 #include <string>
 
 
+/* Template methods */
+template <typename T>
+std::vector<T> slice(std::vector<T> v, std::tuple<int, int> regionBounds)
+{
+    return std::vector<T>(v.begin() + std::get<0>(regionBounds), v.begin() + std::get<1>(regionBounds) + 1);
+}
+
+template <typename T>
+std::vector<T> slice(std::vector<T> v, int start, int end)
+{
+    return std::vector<T>(v.begin() + start, v.begin() + end + 1);
+}
+
+template <typename T>
+std::vector<T> select(std::vector<T> vec, std::initializer_list<std::size_t> indices)
+{
+    std::vector<T> result_vec = std::vector<T>(indices.size());
+    std::transform(indices.begin(), indices.end(), result_vec.begin(), [vec](size_t pos) {return vec[pos]; });
+    return result_vec;
+}
+
+
+
 template <typename T>
 static void softmax(T& input) {
     float rowmax = *std::max_element(input.begin(), input.end());
