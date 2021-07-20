@@ -1,12 +1,5 @@
 // GazeInference_WinCpp.cpp : Defines the entry point for the application.
-//
-
-#include "framework.h"
 #include "GazeInference_WinCpp.h"
-#include "FrameCapture.h"
-#include "ITrackerModel.h"
-#include "SqueezeNet.h"
-#include "UltraFaceNet.h"
 
 #define MAX_LOADSTRING 100
 #define DEFAULT_VIDEO_WIDTH 300
@@ -23,9 +16,8 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-
-FrameCapture* g_pFrameCapture = NULL;
-const wchar_t* modelFilepath = L"assets/itracker.onnx";
+//const wchar_t* modelFilepath = L"assets/itracker.onnx";
+const wchar_t* modelFilepath = L"assets/best_checkpoint_JS4_0_9204.onnx";
 
 
 const wchar_t* labelFilepath = NULL;

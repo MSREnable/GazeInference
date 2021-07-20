@@ -1,15 +1,16 @@
 #pragma once
 #include "framework.h"
-
-
+#include "cpu_provider_factory.h"
 #ifdef USE_DML
-#include "providers.h"
 #include "dml_provider_factory.h"
+#elif USE_OPENVINO
+#include "openvino_provider_factory.h"
+#elif USE_CUDA
+#include "cuda_provider_factory.h"
 #endif
 
 
 const OrtApi* g_ort = NULL;
-
 #define ORT_ABORT_ON_ERROR(expr)                             \
   do {                                                       \
     OrtStatus* onnx_status = (expr);                         \
@@ -77,29 +78,32 @@ private:
         //OrtLoggingLevel logging_level = ORT_LOGGING_LEVEL_ERROR;
 
 
-#if defined(USE_CUDA)
-        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, 0));
-#elif defined(USE_DML)
+#ifdef USE_CUDA
+        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, device_id));
+#elif USE_DML
         // Disabling mem pattern and forcing single-threaded execution since DML is used
         session_options.DisableMemPattern();
         session_options.SetExecutionMode(ExecutionMode::ORT_SEQUENTIAL);
         Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_DML(session_options, device_id));
 
-        //ID3D12Device* device;
-        //ID3D12CommandQueue* cmd_queue;
+        //ID3D12Device* device(0);
+        //ID3D12CommandQueue* cmd_queue(0);
         ////REFIID a = IDMLDevice; //IID_ID3D12Device
         //DML_CREATE_DEVICE_FLAGS flags;
         //Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProviderEx_DML(session_options, (IDMLDevice*)device, cmd_queue));
-#elif defined(USE_OpenVINO)
+#elif USE_OPENVINO
         OrtOpenVINOProviderOptions options;
         options.device_type = "CPU_FP32";
         options.enable_vpu_fast_compile = 0;
-        options.device_id = "";
+        options.device_id = "0";
         options.num_of_threads = 8;
-        Ort::ThrowOnError(SessionOptionsAppendExecutionProvider_OpenVINO(session_options, &options));
+        options.use_compiled_network = false;
+        options.blob_dump_path = "";
+        session_options.AppendExecutionProvider_OpenVINO(options);
+        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_OpenVINO(session_options, options.device_type));
         // Turn off high level optimizations performed by ONNX Runtime 
         // before handing the graph over to OpenVINO backend.
-        session_options.SetGraphOptimizationLevel(ORT_DISABLE_ALL);
+        session_options.SetGraphOptimizationLevel(ORT_DISABLE_ALL);//ORT_ENABLE_EXTENDED
 #else
         //do nothing
         session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
