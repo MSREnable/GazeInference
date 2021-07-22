@@ -51,9 +51,9 @@ protected:
         calibrate(left_eye_rect);
         calibrate(right_eye_rect);
 
-        bool is_valid = check_negative_coordinates(face_rect) &
-            check_negative_coordinates(left_eye_rect) &
-            check_negative_coordinates(right_eye_rect);
+        bool is_valid = validate_bounding_rectangles(face_rect) &
+            validate_bounding_rectangles(left_eye_rect) &
+            validate_bounding_rectangles(right_eye_rect);
 
         rectangles.clear();
         rectangles.push_back(face_rect);
@@ -103,19 +103,28 @@ protected:
         }
     }
 
-    bool check_negative_coordinates(cv::RotatedRect rotatedRect) {
-        //TODO: Implement
-        // Extract 4 corner vertices 
-        cv::Point2f vertices2f[4];
-        rotatedRect.points(vertices2f);
-        bool isValid = true;
+    //Check for out of the image coordinates and unacceptable rectangle sizes 
+    bool validate_bounding_rectangles(cv::RotatedRect rotatedRect) {
+        // SETTING: validate that size is acceptable
+        float size_threshold = 30.0f;
+        float length = std::max(rotatedRect.size.width, rotatedRect.size.height);
+        if (length < size_threshold) {
+            return false;
+        }
+        else {
+            // validate that the corners fall inside the images
+            cv::Point2f vertices2f[4];
+            rotatedRect.points(vertices2f);
+            return check_coordinate(vertices2f[0]) && check_coordinate(vertices2f[1]) &&
+                check_coordinate(vertices2f[2]) && check_coordinate(vertices2f[3]);
+        }
+        return true;
+    }
 
-        //isValid = (vertices2f[0].x >= 0 & vertices2f[0].y >= 0) &
-        //            (vertices2f[1].x <= IMAGE_WIDTH & vertices2f[1].y >= 0) &
-        //            (vertices2f[2].x <= IMAGE_WIDTH & vertices2f[2].y <= IMAGE_HEIGHT) &
-        //            (vertices2f[3].x >= 0 & vertices2f[3].y <= IMAGE_HEIGHT);
-
-        return isValid;
+    bool check_coordinate(cv::Point point) {
+        // TODO: Fetch from livecapture active resolution
+        float H = 720, W = 1280;
+        return (point.x >= 0 && point.x <= W) && (point.y >= 0 && point.y <= H);
     }
 
     void generateFaceEyeImages(cv::Mat imgBGR, std::vector<cv::RotatedRect> rectangles, std::vector<cv::Mat>& roiImages) {
@@ -258,7 +267,7 @@ protected:
             // Extract 4 corner vertices and draw lines to join them
             cv::Point2f vertices2f[4];
             rotatedRect.points(vertices2f);
-            cv::circle(image, vertices2f[1]/*topLeft*/, 3, RED, 3);
+            cv::circle(image, vertices2f[1]/*topLeft*/, 3, GREEN, 3);
             for (int i = 0; i < 4; i++) {
                 cv::line(image, vertices2f[i], vertices2f[(i + 1) % 4], BLUE, 2);
             }
@@ -296,7 +305,7 @@ public:
         std::vector<cv::RotatedRect> rectangles;
         std::vector<cv::Mat> roi_images;
 
-        bool is_valid = findPrimaryFace(frame, face_shape_vector, downscaling) &
+        bool is_valid = findPrimaryFace(frame, face_shape_vector, downscaling) &&
             landmarksToRects(face_shape_vector, rectangles);
 
         //cv::Mat BGR = drawLandmarks(frame, face_shape_vector);
@@ -370,7 +379,7 @@ public:
         std::vector<cv::RotatedRect> rectangles;
         std::vector<cv::Mat> roi_images;
 
-        bool is_valid = findPrimaryFace(webcamImage, face_shape_vector, downscaling) &
+        bool is_valid = findPrimaryFace(webcamImage, face_shape_vector, downscaling) &&
             landmarksToRectsAtEdge(face_shape_vector, rectangles);
 
         if (is_valid) {
@@ -410,9 +419,9 @@ protected:
         calibrate(left_eye_rect, face_rect);
         calibrate(right_eye_rect, face_rect);
 
-        bool is_valid = check_negative_coordinates(face_rect) &
-            check_negative_coordinates(left_eye_rect) &
-            check_negative_coordinates(right_eye_rect);
+        bool is_valid = validate_bounding_rectangles(face_rect) &
+            validate_bounding_rectangles(left_eye_rect) &
+            validate_bounding_rectangles(right_eye_rect);
 
         rectangles.clear();
         rectangles.push_back(face_rect);
@@ -576,7 +585,7 @@ public:
         std::vector<cv::RotatedRect> rectangles;
         std::vector<cv::Mat> roi_images;
 
-        bool is_valid = findPrimaryFace(frame, face_shape_vector, downscaling) &
+        bool is_valid = findPrimaryFace(frame, face_shape_vector, downscaling) &&
             landmarksToRects(face_shape_vector, rectangles);
 
         //cv::Mat BGR = drawLandmarks(frame, face_shape_vector);

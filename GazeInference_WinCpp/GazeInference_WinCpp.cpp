@@ -16,9 +16,7 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-//const wchar_t* modelFilepath = L"assets/itracker.onnx";
-const wchar_t* modelFilepath = L"assets/best_checkpoint_JS4_0_9204.onnx";
-
+const wchar_t* modelFilepath = L"assets/itracker.onnx";
 
 const wchar_t* labelFilepath = NULL;
 std::unique_ptr<ITrackerModel> model;

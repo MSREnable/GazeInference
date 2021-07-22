@@ -85,12 +85,6 @@ private:
         session_options.DisableMemPattern();
         session_options.SetExecutionMode(ExecutionMode::ORT_SEQUENTIAL);
         Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_DML(session_options, device_id));
-
-        //ID3D12Device* device(0);
-        //ID3D12CommandQueue* cmd_queue(0);
-        ////REFIID a = IDMLDevice; //IID_ID3D12Device
-        //DML_CREATE_DEVICE_FLAGS flags;
-        //Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProviderEx_DML(session_options, (IDMLDevice*)device, cmd_queue));
 #elif USE_OPENVINO
         OrtOpenVINOProviderOptions options;
         options.device_type = "CPU_FP32";

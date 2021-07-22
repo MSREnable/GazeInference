@@ -207,7 +207,6 @@ public:
         //return capture.isOpened() && state == STATE::RUNNING;
     }
 
-
     double set_frame_rate(int fps) {
         capture.set(cv::CAP_PROP_FPS, fps);
         active_frame_rate = capture.get(cv::CAP_PROP_FPS);

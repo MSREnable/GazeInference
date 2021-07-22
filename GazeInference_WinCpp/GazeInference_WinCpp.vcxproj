@@ -1,22 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.8.1\build\native\Microsoft.ML.OnnxRuntime.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.1\build\native\Microsoft.ML.OnnxRuntime.props')" />
   <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" />
   <Import Project="..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props')" />
-  <Import Project="..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props')" />
-  <Import Project="..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.props" Condition="Exists('..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.props')" />
-  <Import Project="..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props" Condition="Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props')" />
+  <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props')" />
+  <Import Project="..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props')" />
+  <Import Project="..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props" Condition="Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props')" />
+  <Import Project="..\packages\FaceLibrary-Native.1.0.1\build\native\FaceLibrary-Native.props" Condition="Exists('..\packages\FaceLibrary-Native.1.0.1\build\native\FaceLibrary-Native.props')" />
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Custom|Win32">
+      <Configuration>Custom</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Custom|x64">
+      <Configuration>Custom</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Demo|Win32">
-      <Configuration>Demo</Configuration>
+    <ProjectConfiguration Include="CPU|Win32">
+      <Configuration>CPU</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Demo|x64">
-      <Configuration>Demo</Configuration>
+    <ProjectConfiguration Include="CPU|x64">
+      <Configuration>CPU</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="DML|Win32">
@@ -25,14 +33,6 @@
     </ProjectConfiguration>
     <ProjectConfiguration Include="DML|x64">
       <Configuration>DML</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="OpenVINO|Win32">
-      <Configuration>OpenVINO</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="OpenVINO|x64">
-      <Configuration>OpenVINO</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
@@ -69,7 +69,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CPU|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -85,7 +85,7 @@
     <CharacterSet>Unicode</CharacterSet>
     <VcpkgConfiguration>Release</VcpkgConfiguration>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OpenVINO|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Custom|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -106,7 +106,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CPU|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -122,7 +122,7 @@
     <CharacterSet>Unicode</CharacterSet>
     <VcpkgConfiguration>Release</VcpkgConfiguration>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OpenVINO|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Custom|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -141,13 +141,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Demo|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CPU|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DML|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='OpenVINO|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Custom|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -156,55 +156,85 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Demo|x64'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='CPU|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='OpenVINO|x64'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Custom|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CPU|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OpenVINO|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Custom|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>..\GazeHid\EyeGazeIoctlLibrary\x64\Debug;$(LibraryPath)</LibraryPath>
-    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
-    <LibraryPath>..\GazeHid\x64\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CPU|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
-    <LibraryPath>..\GazeHid\x64\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
-    <LibraryPath>..\GazeHid\x64\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OpenVINO|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Custom|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\GazeHid\EyeGazeIoctlLibrary;$(IncludePath)</IncludePath>
-    <LibraryPath>..\GazeHid\x64\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -234,7 +264,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Demo|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CPU|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -242,6 +272,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE"</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -258,6 +289,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_DML" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -266,7 +298,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='OpenVINO|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Custom|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -274,6 +306,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_DML" </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -318,7 +351,7 @@
       </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CPU|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -327,7 +360,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_CUSTOM_API" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE"</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -349,7 +382,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_CUSTOM_API" /D "USE_DML" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_DML" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -358,7 +391,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='OpenVINO|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Custom|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -367,7 +400,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_CUSTOM_API" /D "USE_OPENVINO" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_DML" /D "USE_CUSTOM_API"</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -434,28 +467,28 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets')" />
-    <Import Project="..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.targets" Condition="Exists('..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.targets')" />
-    <Import Project="..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets" Condition="Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets')" />
     <Import Project="..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets')" />
     <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" />
-    <Import Project="..\packages\Microsoft.ML.OnnxRuntime.1.8.1\build\native\Microsoft.ML.OnnxRuntime.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.1\build\native\Microsoft.ML.OnnxRuntime.targets')" />
+    <Import Project="..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets" Condition="Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets')" />
+    <Import Project="..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets" Condition="Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets')" />
+    <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" />
+    <Import Project="..\packages\FaceLibrary-Native.1.0.1\build\native\FaceLibrary-Native.targets" Condition="Exists('..\packages\FaceLibrary-Native.1.0.1\build\native\FaceLibrary-Native.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.props'))" />
-    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.1\build\native\OpenCV-Native.targets'))" />
-    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.props'))" />
-    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.0\build\native\FaceLibrary-Native.targets'))" />
-    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.props'))" />
-    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.1\build\native\Dlib-Native.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.8.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.1\build\native\Microsoft.ML.OnnxRuntime.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.1.8.1\build\native\Microsoft.ML.OnnxRuntime.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.1.8.1\build\native\Microsoft.ML.OnnxRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.1.8.1\build\native\Microsoft.ML.OnnxRuntime.targets'))" />
+    <Error Condition="!Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props'))" />
+    <Error Condition="!Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props'))" />
+    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props'))" />
+    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.1\build\native\FaceLibrary-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.1\build\native\FaceLibrary-Native.props'))" />
+    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.1\build\native\FaceLibrary-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.1\build\native\FaceLibrary-Native.targets'))" />
   </Target>
 </Project>

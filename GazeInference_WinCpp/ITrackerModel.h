@@ -30,6 +30,7 @@ private:
     std::chrono::steady_clock::time_point epoch;
     double timestamp_ms = -1;
     int frame_count = 0;
+    int reset_threshold = 100;
     std::thread frame_process_thread;
     std::thread inference_thread;
 
@@ -51,7 +52,7 @@ public:
     ITrackerModel(const wchar_t* modelFilePath) 
         : Model{ modelFilePath }
     {
-
+        
     }
 
     ~ITrackerModel() {
@@ -79,6 +80,7 @@ public:
         // Initialize live capture and open live stream
         live_capture = std::make_unique<LiveCapture>();
         live_capture->open();
+        epoch = std::chrono::steady_clock::now();
 
         initCalibrator();
 
@@ -109,17 +111,20 @@ public:
     }
 
     bool getFrame() {
-        if (frame_count == 0)
-            epoch = std::chrono::steady_clock::now();
-
         bool status = live_capture->getFrame(frame);
 
         // calculate timing properties
         frame_count++;
         timestamp_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - epoch).count();
+        float fps = (1000 * frame_count) / timestamp_ms;
+        LOG_DEBUG("%d | %f | %f \n", frame_count, timestamp_ms, fps);
 
-        LOG_DEBUG("%d | %f | %f \n", frame_count, timestamp_ms, (1000 * frame_count)/ timestamp_ms);
-        
+        // reset computation
+        if (frame_count == reset_threshold) {
+            epoch = std::chrono::steady_clock::now();
+            frame_count = 0;
+            reset_threshold = 1000;
+        }
         return status;
     }
 
