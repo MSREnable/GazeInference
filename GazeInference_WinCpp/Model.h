@@ -86,15 +86,22 @@ private:
         session_options.SetExecutionMode(ExecutionMode::ORT_SEQUENTIAL);
         Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_DML(session_options, device_id));
 #elif USE_OPENVINO
+        //InferenceEngine::Core core;
+        //std::vector<std::string> availableDevices = core.GetAvailableDevices();
+
         OrtOpenVINOProviderOptions options;
-        options.device_type = "CPU_FP32";
+        // Single: [CPU_FP32, GPU_FP32, GPU_FP16, MYRIAD_FP16, VAD-M_FP16, VAD-F_FP32]
+        // HETERO: ['CPU','GPU','MYRIAD','FPGA','HDDL']
+        options.device_type = "GPU_FP32";
+        //options.device_type = "HETERO:CPU,GPU";
+        //options.device_type = "MULTI:CPU,GPU";
         options.enable_vpu_fast_compile = 0;
-        options.device_id = "0";
+        options.device_id = "";
         options.num_of_threads = 8;
         options.use_compiled_network = false;
         options.blob_dump_path = "";
         session_options.AppendExecutionProvider_OpenVINO(options);
-        Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_OpenVINO(session_options, options.device_type));
+        //Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_OpenVINO(session_options, options.device_type));
         // Turn off high level optimizations performed by ONNX Runtime 
         // before handing the graph over to OpenVINO backend.
         session_options.SetGraphOptimizationLevel(ORT_DISABLE_ALL);//ORT_ENABLE_EXTENDED

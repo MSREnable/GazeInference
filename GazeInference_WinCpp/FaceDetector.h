@@ -314,7 +314,7 @@ public:
         if (is_valid) {
             generateFaceEyeImages(frame, rectangles, roi_images);
             resizeRoiImages(roi_images);
-            showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
+            //showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
         }
 
         for (auto& image : roi_images) {
