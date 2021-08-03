@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.props" Condition="Exists('..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.props')" />
   <Import Project="..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.props" Condition="Exists('..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.props')" />
-  <Import Project="..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props')" />
   <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props')" />
   <Import Project="..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props')" />
   <Import Project="..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props" Condition="Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props')" />
@@ -257,6 +257,7 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\out\$(Platform)-$(Configuration)\</OutDir>
     <IntDir>$(Platform)-$(Configuration)\</IntDir>
+    <CopyCppRuntimeToOutputDir>true</CopyCppRuntimeToOutputDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DML|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -316,6 +317,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE"</AdditionalOptions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -419,8 +421,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE"</AdditionalOptions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_VERBOSE"</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -442,7 +444,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_DML" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D "USE_EYECONTROL" /D "USE_VERBOSE" /D "USE_DML" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -460,7 +462,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_OPENVINO" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D"USE_EYECONTROL" /D "USE_VERBOSE" /D "USE_OPENVINO" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -478,7 +480,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D "USE_EYECONTROL"  /D "USE_CALIBRATION"  /D "USE_VERBOSE" /D "USE_DML" /D "USE_CUSTOM_API"</AdditionalOptions>
+      <AdditionalOptions>/D "USE_EYECONTROL" /D "USE_VERBOSE" /D "USE_OPENVINO" /D "USE_CUSTOM_API" </AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -490,7 +492,6 @@
   <ItemGroup>
     <ClInclude Include="Calibrator.h" />
     <ClInclude Include="cam2screen.h" />
-    <ClInclude Include="Config.h" />
     <ClInclude Include="cv_constants.h" />
     <ClInclude Include="DelaunayCalibrator.h" />
     <ClInclude Include="FaceDetector.h" />
@@ -506,6 +507,7 @@
     <ClInclude Include="LiveCapture.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="OneEuroFilter.h" />
     <ClInclude Include="Preview.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
@@ -513,12 +515,10 @@
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FrameCapture.cpp" />
     <ClCompile Include="GazeInference_WinCpp.cpp" />
     <ClCompile Include="GenMatrix.cpp" />
     <ClCompile Include="LinearRBF.cpp" />
     <ClCompile Include="Matrix.cpp" />
-    <ClCompile Include="Preview.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GazeInference_WinCpp.rc" />
@@ -545,18 +545,16 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets')" />
     <Import Project="..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets" Condition="Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets')" />
     <Import Project="..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets" Condition="Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets')" />
     <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" />
     <Import Project="..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.targets" Condition="Exists('..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.targets')" />
+    <Import Project="..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.targets" Condition="Exists('..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.5.1\build\Microsoft.AI.DirectML.targets'))" />
     <Error Condition="!Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props'))" />
     <Error Condition="!Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets'))" />
     <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props'))" />
@@ -565,5 +563,7 @@
     <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets'))" />
     <Error Condition="!Exists('..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.props'))" />
     <Error Condition="!Exists('..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.props'))" />
+    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.targets'))" />
   </Target>
 </Project>

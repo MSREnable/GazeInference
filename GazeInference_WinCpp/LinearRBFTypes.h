@@ -4,8 +4,6 @@
 #include <ppltasks.h>
 
 
-
-
 namespace GazeInference_WinCpp
 {
 	class CalibrationHistory

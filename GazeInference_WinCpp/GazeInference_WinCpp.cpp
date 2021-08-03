@@ -17,13 +17,12 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 const wchar_t* modelFilepath = L"assets/itracker.onnx";
-
 const wchar_t* labelFilepath = NULL;
 std::unique_ptr<ITrackerModel> model;
 
-std::unique_ptr<ITrackerModel> OnCreate(HWND hwnd);
-void OnPaint(HWND hwnd);
-void OnChar(HWND hwnd, wchar_t c);
+std::unique_ptr<ITrackerModel>	OnCreate(HWND hwnd);
+void							OnPaint(HWND hwnd);
+void							OnChar(HWND hwnd, wchar_t c);
 
 typedef int(__cdecl* MYPROC)(LPWSTR);
 
@@ -120,22 +119,17 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //        In this function, we save the instance handle in a global variable and
 //        create and display the main program window.
 //
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
-{
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 	hInst = hInstance; // Store instance handle in our global variable
-
 	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_CAPTION | WS_CLIPCHILDREN,
 		CW_USEDEFAULT, CW_USEDEFAULT, DEFAULT_VIDEO_WIDTH, DEFAULT_VIDEO_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 	
-	if (!hWnd)
-	{
+	if (!hWnd) {
 		return FALSE;
 	}
 
-	
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
-
 	return TRUE;
 }
 
@@ -149,10 +143,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - post a quit message and return
 //
 //
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message) {
 	case WM_CREATE:
 		model = OnCreate(hWnd);
 		break;
@@ -161,7 +153,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		OnPaint(hWnd);
 		break;
 
-	case WM_CLOSE:// Close(X) button;
+	case WM_CLOSE: // Close(X) button;
 		// Destroy window is called by default by DefWinProc
 		DestroyWindow(hWnd);
 		break;
@@ -180,37 +172,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		int wmId = LOWORD(wParam);
 		//Parse the menu selections:
-		switch (wmId)
-		{
-		case 1://Button1
-			InvalidateRect(hWnd, nullptr, true); // redraw (sends a WM_PAINT message)
-			break;
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+		switch (wmId) {
+			case 1://Button1
+				InvalidateRect(hWnd, nullptr, true); // redraw (sends a WM_PAINT message)
+				break;
+			case IDM_ABOUT:
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				break;
+			case IDM_EXIT:
+				DestroyWindow(hWnd);
+				break;
+			default:
+				return DefWindowProc(hWnd, message, wParam, lParam);
 		}
-	}
-	break;
-
-
-	case WM_SIZE:
 		break;
-
-	case WM_WINDOWPOSCHANGED:
-		break;
-
-	case WM_DEVICECHANGE:
-		return TRUE;
-
-	case WM_ERASEBKGND:
-		return 1;
 	}
 
+		case WM_SIZE:
+			break;
+
+		case WM_WINDOWPOSCHANGED:
+			break;
+
+		case WM_DEVICECHANGE:
+			return TRUE;
+
+		case WM_ERASEBKGND:
+			return 1;
+	}
 	return DefWindowProc(hWnd, message, wParam, lParam);;
 }
 
@@ -226,11 +215,9 @@ std::unique_ptr<ITrackerModel> OnCreate(HWND hWnd) {
 	return model;
 }
 
-void OnPaint(HWND hWnd)
-{
+void OnPaint(HWND hWnd) {
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hWnd, &ps);
-	// TODO: Add any drawing code that uses hdc here...
 
 	/* The following line of code fills the update region with a single color, 
 	* using the system - defined window background color(COLOR_WINDOW). The 
@@ -251,39 +238,35 @@ void OnPaint(HWND hWnd)
 	EndPaint(hWnd, &ps);
 }
 
-void OnChar(HWND hWnd, wchar_t c)
-{
-	switch (c)
-	{
-	case L'o':
-	case L'O':
-		break;
+void OnChar(HWND hWnd, wchar_t c) {
+	switch (c) {
+		case L'o':
+		case L'O':
+			break;
 
-	case L'p':
-	case L'P':
-		break;
-	case L'c':
-	case L'C':
-		break;
+		case L'p':
+		case L'P':
+			break;
+		case L'c':
+		case L'C':
+			break;
 	}
 }
 
 // Message handler for about box.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		return (INT_PTR)TRUE;
-
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
-			EndDialog(hDlg, LOWORD(wParam));
+	switch (message) {
+		case WM_INITDIALOG:
 			return (INT_PTR)TRUE;
-		}
-		break;
+
+		case WM_COMMAND:
+			if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+			{
+				EndDialog(hDlg, LOWORD(wParam));
+				return (INT_PTR)TRUE;
+			}
+			break;
 	}
 	return (INT_PTR)FALSE;
 }

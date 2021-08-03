@@ -310,17 +310,6 @@ public:
         }
     }
 
-    //void save() {
-    //    const wchar_t* calibrationModelPath = L"assets/calibrationModel.txt";
-    //    //std::ofstream output_file(calibrationModelPath, std::ios::out | std::ofstream::binary);
-    //    std::ofstream output_file(calibrationModelPath);
-    //    std::ostream_iterator<cv::Point2f> output_iterator(output_file);
-    //    std::copy(this->actual_coordinates.begin(), this->actual_coordinates.end(), output_iterator);
-    //    //load();
-    //}
-
-
-
     bool serialize(const wchar_t* path) override final {
 
         std::ofstream out(path);

@@ -1,14 +1,6 @@
 #pragma once
 #include "framework.h"
-
-/* Dlib Dependencies */
 #include "Utils.h"
-#include <dlib/opencv.h> 
-#include <dlib/image_processing.h>
-#include <dlib/image_processing/frontal_face_detector.h>
-#include <dlib/gui_widgets.h>
-#include <dlib/image_io.h>
-#include "UltraFaceNet.h"
 
 class AbstractFaceDetector {
 protected:
@@ -24,15 +16,6 @@ public:
 protected:
     virtual bool findPrimaryFace(cv::Mat inputImage, std::vector<cv::Point2f>& landmarks, cv::Size downscaling) = 0;
 
-    std::vector<cv::Point2f> shape_to_landmarks(dlib::full_object_detection shape) {
-        std::vector<cv::Point2f> parts;
-        for (unsigned long i = 0; i < shape.num_parts(); i++) {
-            dlib::point part = shape.part(i);
-            parts.push_back(cv::Point2f(part.x(), part.y()));
-        }
-        return parts;
-    }
-
     bool landmarksToRects(std::vector<cv::Point2f> face_shape_vector, std::vector<cv::RotatedRect>& rectangles) {
         cv::RotatedRect face_rect = { {0, 0}, {0, 0}, 0 };
         cv::RotatedRect left_eye_rect = { {0, 0}, {0, 0}, 0 };
@@ -45,8 +28,8 @@ protected:
         left_eye_rect = cv::minAreaRect(left_eye_shape_vector);
         right_eye_rect = cv::minAreaRect(right_eye_shape_vector);
 
-        // face_rect must be calibrated before eye rects 
-        // for relative coordinates
+        // face_rect must be calibrated before eye rects for 
+        // relative coordinates
         calibrate(face_rect);
         calibrate(left_eye_rect);
         calibrate(right_eye_rect);
@@ -81,15 +64,26 @@ protected:
         cv::Point2f ref_vertices[4];
         refRect.points(ref_vertices);
 
-        // width is the smaller side. For eyes thats the vertical side.
-        cv::Point2f tgt_vertices[4] = { cv::Point2f(0,refRect.size.width), cv::Point2f(0,0), cv::Point2f(refRect.size.height,0), cv::Point2f(refRect.size.height,refRect.size.width) };
+        // Smaller side is considered the width. 
+        // Therefore, For eyes it's the vertical side.
+        cv::Point2f tgt_vertices[4] = { 
+            cv::Point2f(0, refRect.size.width), 
+            cv::Point2f(0, 0), 
+            cv::Point2f(refRect.size.height, 0), 
+            cv::Point2f(refRect.size.height, refRect.size.width) 
+        };
         cv::Mat M = cv::getAffineTransform(ref_vertices, tgt_vertices);
 
         std::vector<cv::Point2f> rect_corners_transformed(4);
-        cv::transform(std::vector<cv::Point2f>(std::begin(src_vertices), std::end(src_vertices)), rect_corners_transformed, M);
+        cv::transform(
+            std::vector<cv::Point2f>(std::begin(src_vertices), std::end(src_vertices)), 
+            rect_corners_transformed, 
+            M);
 
-        // Using the 3-pt constructor fails occasionaaly when transformed rectangle 
-        // is not exactly right-angled. We use minAreaRect instead.
+        // The transformed rectangle is not always right-angled due to the 
+        // transformation approximations and therefore, the 3-pt constructor 
+        // occasionally fails. "minAreaRect" always yields the right-angled 
+        // rectangle.
         srcRect = cv::minAreaRect(rect_corners_transformed);
         calibrate(srcRect);
     }
@@ -99,11 +93,11 @@ protected:
         // This is based on the long edge of the rectangle
         if (srcRect.angle > 45) {
             srcRect.angle = srcRect.angle - 90;
-            std::swap(srcRect.size.height, srcRect.size.width);//Swap values of (W,H)
+            // Swap values of (W,H)
+            std::swap(srcRect.size.height, srcRect.size.width);
         }
     }
 
-    //Check for out of the image coordinates and unacceptable rectangle sizes 
     bool validate_bounding_rectangles(cv::RotatedRect rotatedRect) {
         // SETTING: validate that size is acceptable
         float size_threshold = 30.0f;
@@ -130,7 +124,6 @@ protected:
     void generateFaceEyeImages(cv::Mat imgBGR, std::vector<cv::RotatedRect> rectangles, std::vector<cv::Mat>& roiImages) {
         // Convert to BGR -> YCbCr
         cv::Mat imgYCbCr = cvtColor_BGR2YCbCr(imgBGR);
-
         roiImages.clear();
         roiImages.push_back(cropRect(imgYCbCr, rectangles[0] /*faceRotatedRect*/));
         roiImages.push_back(cropRect(imgYCbCr, rectangles[1] /*leftEyeRotatedRect*/));
@@ -191,24 +184,32 @@ protected:
 
     void resizeRoiImages(std::vector<cv::Mat>& roiImages) {
         for (int i = 0; i < roiImages.size(); i++) {
-            cv::resize(roiImages[i], roiImages[i], cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT), cv::InterpolationFlags::INTER_AREA);
+            cv::resize(roiImages[i], roiImages[i], 
+                cv::Size(IMAGE_WIDTH, IMAGE_HEIGHT), 
+                cv::InterpolationFlags::INTER_AREA);
         }
     }
 
     /* Visualization helpers */
-    void showRoiExtraction(cv::Mat webcamImage, std::vector<cv::Point2f> face_shape_vector, std::vector<cv::RotatedRect> rectangles, std::vector<cv::Mat> roi_images) {
-
+    void showRoiExtraction(cv::Mat webcamImage, 
+        std::vector<cv::Point2f> face_shape_vector, 
+        std::vector<cv::RotatedRect> rectangles, 
+        std::vector<cv::Mat> roi_images) {
+#ifdef USE_DEBUG_MODE
         cv::Mat anchor_image, roi_grid_image, anchored_roi_grid_image;
         roi_grid_image = createGrid(select(roi_images, { 0, 3, 1, 2 }), 2);
         anchor_image = drawRectangles(drawLandmarks(webcamImage, face_shape_vector), rectangles);
 
         // Resize anchor image to roi_grid height maintaining the aspect ratio
         float aspect_ratio = roi_grid_image.size().height / float(anchor_image.size().height);
-        cv::resize(anchor_image, anchor_image, cv::Size(anchor_image.size().width * aspect_ratio, roi_grid_image.size().height));
+        cv::resize(anchor_image, anchor_image, 
+            cv::Size(anchor_image.size().width * aspect_ratio, 
+                roi_grid_image.size().height));
 
         // Horizaontally concatenate the anchor and roi-grid images
         cv::hconcat(anchor_image, roi_grid_image, anchored_roi_grid_image);
         showImage("ROI", anchored_roi_grid_image);
+#endif
     }
 
     cv::Mat createGrid(std::vector<cv::Mat> images, int n_cols)
@@ -223,8 +224,7 @@ protected:
         cv::Mat3b grid(n_rows * sz.height, n_cols * sz.width, cv::Vec3b(0, 0, 0));
 
         // For each image
-        for (int i = 0; i < images.size(); ++i)
-        {
+        for (int i = 0; i < images.size(); ++i){
             // Get x,y position in the grid
             int x = (i % n_cols) * sz.width;
             int y = (i / n_cols) * sz.height;
@@ -263,7 +263,6 @@ protected:
     cv::Mat drawRectangles(cv::Mat webcamImage, std::vector<cv::RotatedRect> rectangles) {
         cv::Mat image = webcamImage.clone();
         for (auto& rotatedRect : rectangles) {
-
             // Extract 4 corner vertices and draw lines to join them
             cv::Point2f vertices2f[4];
             rotatedRect.points(vertices2f);
@@ -277,12 +276,23 @@ protected:
 
 };
 
+
+#ifndef USE_CUSTOM_API
+
+/* Dlib Dependencies */
+#include <dlib/opencv.h> 
+#include <dlib/image_processing.h>
+#include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/gui_widgets.h>
+#include <dlib/image_io.h>
+#include "UltraFaceNet.h"
+
 class DefaultFaceDetector : public AbstractFaceDetector {
 protected:
-    std::unique_ptr<UltraFaceNet> ultraFaceNet;
+    std::unique_ptr<UltraFaceNet> faceDetector;
     std::vector<dlib::rectangle> face_rectangles;
-    dlib::shape_predictor predictor;
-    std::string predictor_model_path = "assets/shape_predictor_68_face_landmarks.dat";
+    dlib::shape_predictor landmarksDetector;
+    std::string landmarksDetector_model_path = "assets/shape_predictor_68_face_landmarks.dat";
 
 public:
     DefaultFaceDetector() {
@@ -308,13 +318,10 @@ public:
         bool is_valid = findPrimaryFace(frame, face_shape_vector, downscaling) &&
             landmarksToRects(face_shape_vector, rectangles);
 
-        //cv::Mat BGR = drawLandmarks(frame, face_shape_vector);
-        //display("Output", frame, BGR, 0.5);
-
         if (is_valid) {
             generateFaceEyeImages(frame, rectangles, roi_images);
             resizeRoiImages(roi_images);
-            //showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
+            showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
         }
 
         for (auto& image : roi_images) {
@@ -326,9 +333,9 @@ public:
 protected:
     void initialize() {
         // Initialize face detector
-        ultraFaceNet = std::make_unique<UltraFaceNet>(L"assets/version-slim-320_without_postprocessing.onnx");
-        // initialize landmark detector
-        dlib::deserialize(predictor_model_path) >> predictor;
+        faceDetector = std::make_unique<UltraFaceNet>(L"assets/version-slim-320_without_postprocessing.onnx");
+        // Initialize landmark detector
+        dlib::deserialize(landmarksDetector_model_path) >> landmarksDetector;
     }
 
     bool findPrimaryFace(cv::Mat inputImage, std::vector<cv::Point2f>& landmarks, cv::Size downscaling) override {
@@ -345,7 +352,7 @@ protected:
         // Detect faces in every Kth (SKIP_FRAMES) frames
         if (frame_count % SKIP_FRAMES == 0) {
             // image Resize is handled by ultraface internally 
-            face_rectangles = ultraFaceNet->detect_faces(inputImageRGB);
+            face_rectangles = faceDetector->detect_faces(inputImageRGB);
             frame_count = 0; //reset frame count 
         }
         frame_count++;
@@ -357,10 +364,19 @@ protected:
         if (face_rectangles.size() > 0) {
             is_valid = true;
             dlib::rectangle rect = face_rectangles[0];
-            shape = predictor(inputImage_dlib, rect);
+            shape = landmarksDetector(inputImage_dlib, rect);
             landmarks = shape_to_landmarks(shape);
         }
         return is_valid;
+    }
+
+    std::vector<cv::Point2f> shape_to_landmarks(dlib::full_object_detection shape) {
+        std::vector<cv::Point2f> parts;
+        for (unsigned long i = 0; i < shape.num_parts(); i++) {
+            dlib::point part = shape.part(i);
+            parts.push_back(cv::Point2f(part.x(), part.y()));
+        }
+        return parts;
     }
 };
 
@@ -389,7 +405,7 @@ public:
             generateFaceEyeImagesAtCompute(webcamImage.size(), faceImage, rectangles, roi_images);
             resizeRoiImages(roi_images);
             privacyMask(webcamImage, rectangles[0]);
-            //showRoiExtractionAtCompute(webcamImage, face_shape_vector, rectangles, roi_images);
+            showRoiExtractionAtCompute(webcamImage, face_shape_vector, rectangles, roi_images);
         }
 
         for (auto& image : roi_images) {
@@ -401,8 +417,8 @@ public:
 protected:
     bool landmarksToRectsAtEdge(std::vector<cv::Point2f> face_shape_vector, std::vector<cv::RotatedRect>& rectangles) {
         cv::RotatedRect face_rect = { {0, 0}, {0, 0}, 0 };
-        cv::RotatedRect left_eye_rect = { {0, 0}, {0, 0}, 0 };//relative to face_rect
-        cv::RotatedRect right_eye_rect = { {0, 0}, {0, 0}, 0 };//relative to face_rect
+        cv::RotatedRect left_eye_rect = { {0, 0}, {0, 0}, 0 };
+        cv::RotatedRect right_eye_rect = { {0, 0}, {0, 0}, 0 };
 
         auto left_eye_shape_vector = slice(face_shape_vector, FACIAL_LANDMARKS_IDXS["left_eye"]);
         auto right_eye_shape_vector = slice(face_shape_vector, FACIAL_LANDMARKS_IDXS["right_eye"]);
@@ -425,8 +441,8 @@ protected:
 
         rectangles.clear();
         rectangles.push_back(face_rect);
-        rectangles.push_back(left_eye_rect);
-        rectangles.push_back(right_eye_rect);
+        rectangles.push_back(left_eye_rect);//relative to face_rect
+        rectangles.push_back(right_eye_rect);//relative to face_rect
 
         return is_valid;
     }
@@ -438,8 +454,8 @@ protected:
 
     void generateFaceEyeImagesAtCompute(cv::Size webcamImageSize, cv::Mat face_image, std::vector<cv::RotatedRect> rectangles, std::vector<cv::Mat>& roi_images) {
         cv::RotatedRect face_rect = rectangles[0];
-        cv::RotatedRect left_eye_rect = rectangles[1];//relative to face_rect
-        cv::RotatedRect right_eye_rect = rectangles[2];//relative to face_rect
+        cv::RotatedRect left_eye_rect = rectangles[1];
+        cv::RotatedRect right_eye_rect = rectangles[2];
 
         // Convert to YCbCr
         face_image = cvtColor_BGR2YCbCr(face_image);
@@ -453,10 +469,6 @@ protected:
         roi_images.push_back(left_eye_image);
         roi_images.push_back(right_eye_image);
         roi_images.push_back(face_grid_image);
-
-        //cv::Mat testImage = drawRectangles(face_image, std::vector<cv::RotatedRect>{rectangles[1], rectangles[2]});
-        //showImage("test", testImage);
-
         return;
     }
 
@@ -515,7 +527,7 @@ protected:
     }
 
     void showRoiExtractionAtCompute(cv::Mat webcamImage, std::vector<cv::Point2f> face_shape_vector, std::vector<cv::RotatedRect> rectangles, std::vector<cv::Mat> roi_images) {
-
+#ifdef USE_DEBUG_MODE
         cv::Mat anchor_image, roi_grid_image, anchored_roi_grid_image;
         // Draw eye rects on face image
         resizeRectangles(rectangles);
@@ -525,11 +537,14 @@ protected:
 
         // Resize anchor image to roi_grid height maintaining the aspect ratio
         float aspect_ratio = roi_grid_image.size().height / float(anchor_image.size().height);
-        cv::resize(anchor_image, anchor_image, cv::Size(anchor_image.size().width * aspect_ratio, roi_grid_image.size().height));
+        cv::resize(anchor_image, anchor_image, 
+            cv::Size(anchor_image.size().width * aspect_ratio, 
+                roi_grid_image.size().height));
 
         // Horizaontally concatenate the anchor and roi-grid images
         cv::hconcat(anchor_image, roi_grid_image, anchored_roi_grid_image);
         showImage("ROI-Two-Stage", anchored_roi_grid_image);
+#endif
     }
 
     void resizeRectangles(std::vector<cv::RotatedRect>& rectangles) {
@@ -552,6 +567,7 @@ protected:
         }
     }
 };
+#endif
 
 
 #ifdef USE_CUSTOM_API
@@ -588,13 +604,10 @@ public:
         bool is_valid = findPrimaryFace(frame, face_shape_vector, downscaling) &&
             landmarksToRects(face_shape_vector, rectangles);
 
-        //cv::Mat BGR = drawLandmarks(frame, face_shape_vector);
-        //display("Output", frame, BGR, 0.5);
-
         if (is_valid) {
             generateFaceEyeImages(frame, rectangles, roi_images);
             resizeRoiImages(roi_images);
-            //showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
+            showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
         }
 
         for (auto& image : roi_images) {

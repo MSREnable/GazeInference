@@ -86,22 +86,21 @@ private:
         session_options.SetExecutionMode(ExecutionMode::ORT_SEQUENTIAL);
         Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_DML(session_options, device_id));
 #elif USE_OPENVINO
-        //InferenceEngine::Core core;
-        //std::vector<std::string> availableDevices = core.GetAvailableDevices();
-
         OrtOpenVINOProviderOptions options;
         // Single: [CPU_FP32, GPU_FP32, GPU_FP16, MYRIAD_FP16, VAD-M_FP16, VAD-F_FP32]
         // HETERO: ['CPU','GPU','MYRIAD','FPGA','HDDL']
-        options.device_type = "GPU_FP32";
+         //options.device_type = "CPU_FP32";
+        options.device_type = "GPU_FP16";
         //options.device_type = "HETERO:CPU,GPU";
         //options.device_type = "MULTI:CPU,GPU";
+        //options.device_type = "MULTI:CPU,GPU,MYRIAD";
         options.enable_vpu_fast_compile = 0;
         options.device_id = "";
         options.num_of_threads = 8;
         options.use_compiled_network = false;
         options.blob_dump_path = "";
         session_options.AppendExecutionProvider_OpenVINO(options);
-        //Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_OpenVINO(session_options, options.device_type));
+        
         // Turn off high level optimizations performed by ONNX Runtime 
         // before handing the graph over to OpenVINO backend.
         session_options.SetGraphOptimizationLevel(ORT_DISABLE_ALL);//ORT_ENABLE_EXTENDED
@@ -132,24 +131,20 @@ private:
         Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(
             OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
 
-
         // Assign the inputs/outputs Tensors to the inputTensors/outputTensors
         // *** these buffers will not change, only the inputs/outputs get updated ***
         size_t numInputNodes = session.GetInputCount();
         for (int i = 0; i < numInputNodes; i++) {
-
             // Retrieve Input Tensor Info
             Ort::TypeInfo inputTypeInfo = session.GetInputTypeInfo(i);
             Ort::TensorTypeAndShapeInfo inputTensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
             ONNXTensorElementDataType inputType = inputTensorInfo.GetElementType();
             std::vector<int64_t> inputDims = inputTensorInfo.GetShape();
 
-            LOG_DEBUG("##########\n");
             for (std::string provider : Ort::GetAvailableProviders()) {
                 LOG_DEBUG("%s\n", provider.c_str());
             }
             
-
             Input input;
             input.dims = inputDims; // set shape
             input.values = std::vector<float>(vectorProduct(inputDims)); // set values
@@ -161,9 +156,6 @@ private:
             inputTensors.push_back(Ort::Value::CreateTensor<float>(memoryInfo,
                 inputs[i].values.data(), inputs[i].values.size(),
                 inputs[i].dims.data(), inputs[i].dims.size()));
-
-            //cv::Mat dummyFrame = cv::Mat(224, 224);
-            //preprocessedFrames.push_back(dummyFrame);
 
             // Cleanup
             inputTypeInfo.release();

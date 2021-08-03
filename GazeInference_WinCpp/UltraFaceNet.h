@@ -17,7 +17,7 @@ typedef struct FaceInfo {
 
 #define clip(x, y) (x < 0 ? 0 : (x > y ? y : x))
 
-// SqueezeNet Model
+// UltraFaceNet Model
 class UltraFaceNet : public Model
 {
 private:

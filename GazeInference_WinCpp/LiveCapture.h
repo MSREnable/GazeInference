@@ -19,7 +19,6 @@ private:
     int state = STATE::INACTIVE;
     //int state = STATE::DORMANT;
     
-
     const std::vector<cv::Size> CommonResolutions = {
         cv::Size(320, 240),
         cv::Size(640, 480),
@@ -54,6 +53,29 @@ public:
     ~LiveCapture() 
     {
         // Cleanup 
+    }
+
+    int getFrontCameraId()
+    {
+        std::vector<double> frameDims;
+        int maxID = 2; 
+        int idx = 0;
+        while (idx < maxID) {
+            cv::VideoCapture cap = cv::VideoCapture(idx); // open the camera
+            if (cap.isOpened()) {
+                cap.set(cv::CAP_PROP_FRAME_WIDTH, 10000);
+                frameDims[idx] = cap.get(cv::CAP_PROP_FRAME_WIDTH);
+            }
+            cap.release();
+            idx++;
+        }
+
+        if (frameDims[0] <= frameDims[1]) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
     }
 
     
@@ -170,7 +192,9 @@ public:
 
     void open() {
         // TODO: Infuture use the enumerate method to get the captureDeviceId
+
         //std::vector<int> captureDevices = enumerateCaptureDevices();
+        //capture = cv::VideoCapture(captureDevices[0]);
         //std::vector<cv::Size> supportedResolutions = enumerateSupportedResolutions(capture);
 
         // open camera for video stream

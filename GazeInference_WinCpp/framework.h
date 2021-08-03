@@ -4,21 +4,21 @@
 
 #pragma once
 #include "targetver.h"
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 
 // Windows Header Files
 #include <windows.h>
-#include <windowsx.h> // GET_X_LPARAM, GET_Y_LPARAM
+#include <windowsx.h>		// GET_X_LPARAM, GET_Y_LPARAM
 
 // C RunTime Header Files
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
-#include <strmif.h> // IGraphBuilder, ICaptureGraphBuilder2
-#include <dshow.h> // DirectShow header file.  CLSID_CaptureGraphBuilder2, CLSID_FilterGraph
-#include "atlbase.h"   // ATL smart pointers CCOMPtr
-#pragma comment(lib, "strmiids")    // Link to DirectShow GUIDs.
+#include <strmif.h>			// IGraphBuilder, ICaptureGraphBuilder2
+#include <dshow.h>			// DirectShow header file.  CLSID_CaptureGraphBuilder2, CLSID_FilterGraph
+#include "atlbase.h"		// ATL smart pointers CCOMPtr
+#pragma comment(lib, "strmiids")	// Link to DirectShow GUIDs.
 
 #include <new>
 #include <array>

@@ -7,14 +7,12 @@
 #include <ctime>
 #include "LinearRBFCalibrator.h"
 #include "DelaunayCalibrator.h"
-
-
+#include "OneEuroFilter.h"
 
 #ifdef USE_EYECONTROL
 #include "EyeGazeIoctlLibrary.h"
 #pragma comment(lib, "EyeGazeIoctlLibrary.lib")
 #endif
-
 
 // ITracker Model
 class ITrackerModel : public Model
@@ -26,6 +24,7 @@ private:
     std::unique_ptr<AbstractFaceDetector> detector;
     std::unique_ptr<Calibrator> calibrator;
     int calibration_type = CALIBRATION_TYPE::DELAUNAY;
+    GazeFilter* gazeFilter;
 
     std::chrono::steady_clock::time_point epoch;
     double timestamp_ms = -1;
@@ -39,24 +38,23 @@ private:
     POINT mousePoint;
 
 #ifdef USE_EYECONTROL
-    int screenWidth = GetPrimaryMonitorWidthUm();
-    int screenHeight = GetPrimaryMonitorHeightUm();
-#else
-    // Depends upon windows.h
-    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+    int screenWidthUm = GetPrimaryMonitorWidthUm();
+    int screenHeightUm = GetPrimaryMonitorHeightUm();
+#elif
+    HDC screen = GetDC(NULL);
+    int screenWidthUm = 1000 * GetDeviceCaps(screen, HORZSIZE);
+    int screenHeightUm = 1000 * GetDeviceCaps(screen, VERTSIZE);
 #endif
-
 
 public:
     ITrackerModel(const wchar_t* modelFilePath) 
         : Model{ modelFilePath }
     {
-        
+        gazeFilter = new GazeFilter();
     }
 
     ~ITrackerModel() {
-        // Cleanup 
+        delete gazeFilter;
     }
 
     bool isActive() {
@@ -70,7 +68,6 @@ public:
         detector = std::make_unique<CustomFaceDetector>();
 #else
         detector = std::make_unique<DefaultFaceDetector>();
-        //detector = std::make_unique<TwoStageFaceDetector>();
 #endif
 
 #ifdef USE_EYECONTROL
@@ -88,15 +85,15 @@ public:
         HWND desktopHwnd = GetDesktopWindow();
         GetWindowRect(desktopHwnd, &desktopRect);
         // screen size to pixel ratio
-        xMonitorRatio = (FLOAT)screenWidth / (FLOAT)desktopRect.right;
-        yMonitorRatio = (FLOAT)screenHeight / (FLOAT)desktopRect.bottom;
+        xMonitorRatio = (FLOAT)screenWidthUm / (FLOAT)desktopRect.right;
+        yMonitorRatio = (FLOAT)screenHeightUm / (FLOAT)desktopRect.bottom;
 
         return isActive();
     }
 
     void initCalibrator() {
         // Screen size (can use desktopRect as well)
-        cv::Rect rect = cv::Rect(0, 0, screenWidth, screenHeight);
+        cv::Rect rect = cv::Rect(0, 0, screenWidthUm, screenHeightUm);
         if (this->calibration_type == CALIBRATION_TYPE::LINEAR_RBF) {
             this->calibrator = std::make_unique<LinearRBFCalibrator>(rect);
         }
@@ -156,7 +153,7 @@ public:
         LOG_DEBUG("x=%.2f, y=%.2f\n", predictedPoint.x, predictedPoint.y);
 
         // Convert to screen coordinates
-        cv::Point point = cam2screen(predictedPoint, screenWidth, screenHeight);
+        cv::Point point = cam2screen(predictedPoint, screenWidthUm, screenHeightUm);
 
         
 #ifdef USE_CALIBRATION
@@ -228,9 +225,15 @@ public:
         }
         LOG_DEBUG("Predicted (%d, %d) | Calibrated (%d, %d)\n", point.x, point.y, calibratedPoint.x, calibratedPoint.y);
 
+        // apply smoothening
+        calibratedPoint = gazeFilter->filter(calibratedPoint); 
+
 #ifdef USE_EYECONTROL
         // Send to GazeHID
         SendGazeReportUm(calibratedPoint.x, calibratedPoint.y, 0);
+
+        //// Convert to Mouse Cursor Position
+        //SetCursorPos(calibratedPoint.x / xMonitorRatio, calibratedPoint.y / yMonitorRatio);
 #endif
 
         return calibratedPoint;
