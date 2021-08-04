@@ -40,7 +40,7 @@ private:
 #ifdef USE_EYECONTROL
     int screenWidthUm = GetPrimaryMonitorWidthUm();
     int screenHeightUm = GetPrimaryMonitorHeightUm();
-#elif
+#else
     HDC screen = GetDC(NULL);
     int screenWidthUm = 1000 * GetDeviceCaps(screen, HORZSIZE);
     int screenHeightUm = 1000 * GetDeviceCaps(screen, VERTSIZE);
