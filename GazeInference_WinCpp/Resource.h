@@ -18,6 +18,14 @@
 #endif
 // Next default values for new objects
 //
+#define IDM_SWITCH_CAMERA		1001
+
+
+#define IDM_EP_CPU        2001
+#define IDM_EP_CUDA       2002
+#define IDM_EP_OpenVINO   2003
+#define IDM_EP_DirectML   2004
+
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 

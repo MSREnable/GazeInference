@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.props" Condition="Exists('..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.props')" />
-  <Import Project="..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.props" Condition="Exists('..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.props')" />
+  <Import Project="..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props')" />
+  <Import Project="..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props" Condition="Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props')" />
   <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props')" />
-  <Import Project="..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props')" />
   <Import Project="..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props" Condition="Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Custom|Win32">
@@ -383,7 +382,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -400,7 +399,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -443,7 +442,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D "USE_EYECONTROL" /D "USE_VERBOSE" /D "USE_DML" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -461,7 +460,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D"USE_EYECONTROL" /D "USE_VERBOSE" /D "USE_OPENVINO" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -479,7 +478,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\GazeHid\EyeGazeIoctlLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/D "USE_EYECONTROL" /D "USE_VERBOSE" /D "USE_OPENVINO" /D "USE_CUSTOM_API" </AdditionalOptions>
     </ClCompile>
     <Link>
@@ -546,10 +545,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets" Condition="Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets')" />
-    <Import Project="..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets" Condition="Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets')" />
     <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" />
-    <Import Project="..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.targets" Condition="Exists('..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.targets')" />
-    <Import Project="..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.targets" Condition="Exists('..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.targets')" />
+    <Import Project="..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets" Condition="Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets')" />
+    <Import Project="..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.targets" Condition="Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -557,13 +555,11 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props'))" />
     <Error Condition="!Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets'))" />
-    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.props'))" />
-    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.2\build\native\Dlib-Native.targets'))" />
     <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props'))" />
     <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets'))" />
-    <Error Condition="!Exists('..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.props'))" />
-    <Error Condition="!Exists('..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OnnxRuntime-Native.1.8.1\build\native\OnnxRuntime-Native.targets'))" />
-    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.props'))" />
-    <Error Condition="!Exists('..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FaceLibrary-Native.1.0.2\build\native\FaceLibrary-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props'))" />
+    <Error Condition="!Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets'))" />
+    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props'))" />
+    <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.targets'))" />
   </Target>
 </Project>

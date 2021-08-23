@@ -197,13 +197,21 @@ protected:
         std::vector<cv::Mat> roi_images) {
 #ifdef USE_DEBUG_MODE
         cv::Mat anchor_image, roi_grid_image, anchored_roi_grid_image;
-        roi_grid_image = createGrid(select(roi_images, { 0, 3, 1, 2 }), 2);
-        anchor_image = drawRectangles(drawLandmarks(webcamImage, face_shape_vector), rectangles);
+
+        // If face wasn't detected draw just the image with blank roi_grid
+        if (face_shape_vector.empty() || rectangles.empty() || roi_images.empty()) {
+            roi_grid_image = cv::Mat(2 * IMAGE_HEIGHT, 2 * IMAGE_WIDTH, CV_8UC3, BLACK);
+            anchor_image = webcamImage;
+        }
+        else {// otherwise create a grid with roi_images
+            roi_grid_image = createGrid(select(roi_images, { 0, 3, 1, 2 }), 2);
+            anchor_image = drawRectangles(drawLandmarks(webcamImage, face_shape_vector), rectangles);
+        }
 
         // Resize anchor image to roi_grid height maintaining the aspect ratio
         float aspect_ratio = roi_grid_image.size().height / float(anchor_image.size().height);
-        cv::resize(anchor_image, anchor_image, 
-            cv::Size(anchor_image.size().width * aspect_ratio, 
+        cv::resize(anchor_image, anchor_image,
+            cv::Size(anchor_image.size().width * aspect_ratio,
                 roi_grid_image.size().height));
 
         // Horizaontally concatenate the anchor and roi-grid images
@@ -321,9 +329,9 @@ public:
         if (is_valid) {
             generateFaceEyeImages(frame, rectangles, roi_images);
             resizeRoiImages(roi_images);
-            showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
         }
-
+        showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
+        
         for (auto& image : roi_images) {
             image.convertTo(image, CV_32FC3, 1.0 / 255.0);
         }
@@ -529,11 +537,19 @@ protected:
     void showRoiExtractionAtCompute(cv::Mat webcamImage, std::vector<cv::Point2f> face_shape_vector, std::vector<cv::RotatedRect> rectangles, std::vector<cv::Mat> roi_images) {
 #ifdef USE_DEBUG_MODE
         cv::Mat anchor_image, roi_grid_image, anchored_roi_grid_image;
-        // Draw eye rects on face image
-        resizeRectangles(rectangles);
-        roi_images[0] = drawRectangles(roi_images[0], select(rectangles, { 1, 2 }));
-        roi_grid_image = createGrid(select(roi_images, { 0, 3, 1, 2 }), 2);
-        anchor_image = drawRectangles(drawLandmarks(webcamImage, face_shape_vector), select(rectangles, { 0 }));
+
+        // If face wasn't detected draw just the image with blank roi_grid
+        if (face_shape_vector.empty() || rectangles.empty() || roi_images.empty()) {
+            roi_grid_image = cv::Mat(2 * IMAGE_HEIGHT, 2 * IMAGE_WIDTH, CV_8UC3, BLACK);
+            anchor_image = webcamImage;
+        }
+        else {// otherwise create a grid with roi_images
+            // Draw eye rects on face image
+            resizeRectangles(rectangles);
+            roi_images[0] = drawRectangles(roi_images[0], select(rectangles, { 1, 2 }));
+            roi_grid_image = createGrid(select(roi_images, { 0, 3, 1, 2 }), 2);
+            anchor_image = drawRectangles(drawLandmarks(webcamImage, face_shape_vector), select(rectangles, { 0 }));
+        }
 
         // Resize anchor image to roi_grid height maintaining the aspect ratio
         float aspect_ratio = roi_grid_image.size().height / float(anchor_image.size().height);
@@ -607,8 +623,8 @@ public:
         if (is_valid) {
             generateFaceEyeImages(frame, rectangles, roi_images);
             resizeRoiImages(roi_images);
-            showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
         }
+        showRoiExtraction(frame, face_shape_vector, rectangles, roi_images);
 
         for (auto& image : roi_images) {
             image.convertTo(image, CV_32FC3, 1.0 / 255.0);

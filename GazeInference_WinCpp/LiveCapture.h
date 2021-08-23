@@ -47,7 +47,7 @@ public:
         FRAME_RATE{ frame_rate },
         RESOLUTION{resolution}
     {
-
+        capture = cv::VideoCapture();
     }
 
     ~LiveCapture() 
@@ -190,22 +190,32 @@ public:
         return supportedVideoResolutions;
     }
 
-    void open() {
-        // TODO: Infuture use the enumerate method to get the captureDeviceId
+    void switchCamera() {
+        if (CAPTURE_DEVICE_ID == 0) {
+            CAPTURE_DEVICE_ID = 1;
+        }
+        else {
+            CAPTURE_DEVICE_ID = 0;
+        }
+        // Release existing camera
+        close();
+        // Now open new camera 
+        open();
+        
+    }
 
+    void open() {
+        // TODO: In future use the enumerate method to get the captureDeviceId
         //std::vector<int> captureDevices = enumerateCaptureDevices();
         //capture = cv::VideoCapture(captureDevices[0]);
         //std::vector<cv::Size> supportedResolutions = enumerateSupportedResolutions(capture);
 
         // open camera for video stream
-        capture = cv::VideoCapture(CAPTURE_DEVICE_ID);
-
-        if (!capture.isOpened())
-        {
+        capture.open(CAPTURE_DEVICE_ID);
+        if (!capture.isOpened()) {
             LOG_ERROR("Cannot open the video camera.");
         }
-        else
-        {
+        else {
             // Set desired capture settings
             set_resolution(RESOLUTION);
             set_frame_rate(FRAME_RATE);
@@ -252,7 +262,6 @@ public:
         return active_resolution;
     }
 
-    
     bool getFrameFromImagePath(std::string imageFilepath, cv::Mat& frame) {
         frame = cv::imread(imageFilepath, cv::ImreadModes::IMREAD_COLOR);
         if (!frame.empty()) {

@@ -76,7 +76,8 @@ private:
         //bool user_graph_optimization_level_set = false;
         //bool set_denormal_as_zero = false;
         //OrtLoggingLevel logging_level = ORT_LOGGING_LEVEL_ERROR;
-
+        //session_options.DisableCpuMemArena();
+        //session_options.DisableMemPattern();
 
 #ifdef USE_CUDA
         Ort::ThrowOnError(OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, device_id));
@@ -88,17 +89,22 @@ private:
 #elif USE_OPENVINO
         OrtOpenVINOProviderOptions options;
         // Single: [CPU_FP32, GPU_FP32, GPU_FP16, MYRIAD_FP16, VAD-M_FP16, VAD-F_FP32]
-        // HETERO: ['CPU','GPU','MYRIAD','FPGA','HDDL']
-         //options.device_type = "CPU_FP32";
-        options.device_type = "GPU_FP16";
+        // HETERO/MULTI: ['CPU','GPU','MYRIAD','FPGA','HDDL']
+        //options.device_type = "CPU_FP32";
+        //options.device_type = "GPU_FP16";
         //options.device_type = "HETERO:CPU,GPU";
-        //options.device_type = "MULTI:CPU,GPU";
+        options.device_type = "MULTI:CPU,GPU";
         //options.device_type = "MULTI:CPU,GPU,MYRIAD";
-        options.enable_vpu_fast_compile = 0;
-        options.device_id = "";
-        options.num_of_threads = 8;
-        options.use_compiled_network = false;
-        options.blob_dump_path = "";
+        //options.device_type = "MYRIAD_FP16";
+
+        // Optimizations for MYRIAD devices
+        if (strstr(options.device_type, "MYRIAD")) {
+            options.enable_vpu_fast_compile = 1;
+            options.device_id = "";
+            options.num_of_threads = 8;
+            options.use_compiled_network = 1;
+            //options.blob_dump_path = "";
+        }
         session_options.AppendExecutionProvider_OpenVINO(options);
         
         // Turn off high level optimizations performed by ONNX Runtime 
@@ -140,10 +146,6 @@ private:
             Ort::TensorTypeAndShapeInfo inputTensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
             ONNXTensorElementDataType inputType = inputTensorInfo.GetElementType();
             std::vector<int64_t> inputDims = inputTensorInfo.GetShape();
-
-            for (std::string provider : Ort::GetAvailableProviders()) {
-                LOG_DEBUG("%s\n", provider.c_str());
-            }
             
             Input input;
             input.dims = inputDims; // set shape
@@ -227,9 +229,14 @@ public:
         }
     }
 
+    std::vector<std::string> getAvailableProviders() {
+        std::vector<std::string> availableProviders;
+        // TODO: Use ReleaseAvailableProviders
+        for (std::string provider : Ort::GetAvailableProviders()) {
+            availableProviders.push_back(provider);
+            LOG_DEBUG("%s\n", provider.c_str());
+        }
+        return availableProviders;
+    }
+
 };
-
-
-
-
-

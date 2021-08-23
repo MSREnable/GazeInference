@@ -15,16 +15,26 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+std::wstring		ToWstring(const std::string& text);
 
 const wchar_t* modelFilepath = L"assets/itracker.onnx";
 const wchar_t* labelFilepath = NULL;
 std::unique_ptr<ITrackerModel> model;
+std::vector<std::string> availableProviders;
 
 std::unique_ptr<ITrackerModel>	OnCreate(HWND hwnd);
 void							OnPaint(HWND hwnd);
 void							OnChar(HWND hwnd, wchar_t c);
 
 typedef int(__cdecl* MYPROC)(LPWSTR);
+
+std::map<std::string, int> EP_ID = { 
+	{"CPUExecutionProvider", IDM_EP_CPU},
+	{"CUDAExecutionProvider", IDM_EP_CUDA},
+	{"OpenVINOExecutionProvider", IDM_EP_OpenVINO},
+	{"DirectMLExecutionProvider", IDM_EP_DirectML}
+};
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -146,8 +156,22 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_CREATE:
+	{
+		// Init model and get availableProviders
 		model = OnCreate(hWnd);
-		break;
+
+		// Create new submenu
+		HMENU hSubMenu = CreatePopupMenu();
+		for (std::string provider : availableProviders) {
+			AppendMenu(hSubMenu, MF_STRING, EP_ID[provider], ToWstring(provider).c_str());
+		}
+
+		// Add to existing menu
+		HMENU hMenu = GetMenu(hWnd);
+		AppendMenu(hMenu, MF_STRING | MF_POPUP, (UINT)hSubMenu, L"&EPs");
+		SetMenu(hWnd, hMenu);
+	}
+	break;
 
 	case WM_PAINT:
 		OnPaint(hWnd);
@@ -182,6 +206,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			case IDM_EXIT:
 				DestroyWindow(hWnd);
 				break;
+			case IDM_SWITCH_CAMERA:
+				model->switchCamera();
+				break;
+				// Process other menu commands.
 			default:
 				return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -208,6 +236,7 @@ std::unique_ptr<ITrackerModel> OnCreate(HWND hWnd) {
 	std::unique_ptr<ITrackerModel> model;
 	try {
 		model = std::make_unique<ITrackerModel>(modelFilepath);
+		availableProviders = model->getAvailableProviders();
 	}
 	catch (const Ort::Exception& exception) {
 		MessageBoxA(nullptr, exception.what(), "Error:", MB_OK);
@@ -251,6 +280,11 @@ void OnChar(HWND hWnd, wchar_t c) {
 		case L'C':
 			break;
 	}
+}
+
+
+std::wstring ToWstring(const std::string& text) {
+	return std::wstring(text.begin(), text.end());
 }
 
 // Message handler for about box.

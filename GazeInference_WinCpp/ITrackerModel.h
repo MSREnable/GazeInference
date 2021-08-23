@@ -91,6 +91,12 @@ public:
         return isActive();
     }
 
+    bool switchCamera() {
+        // Re-initialize live capture 
+        live_capture->switchCamera();
+        return isActive();
+    }
+
     void initCalibrator() {
         // Screen size (can use desktopRect as well)
         cv::Rect rect = cv::Rect(0, 0, screenWidthUm, screenHeightUm);
@@ -120,7 +126,7 @@ public:
         if (frame_count == reset_threshold) {
             epoch = std::chrono::steady_clock::now();
             frame_count = 0;
-            reset_threshold = 1000;
+            reset_threshold = 500;
         }
         return status;
     }
@@ -133,8 +139,15 @@ public:
         // Apply ROI Extraction through dlib
         // frame in BGR and roi_frames YCbCr
         std::vector<cv::Mat> roi_frames = detector->extractRegionsOfInterest(frame, live_capture->downscaling);
-
+        
         if (roi_frames.size() != 4) {
+#ifdef AUTO_CAM_DETECT
+            // XXX: Automatic camera selection is triggered here
+            if (frame_count >= 100) {
+                switchCamera();
+                frame_count = 0;
+            }
+#endif // AUTO_CAM_DETECT
             return false;
         }
 
@@ -155,7 +168,6 @@ public:
         // Convert to screen coordinates
         cv::Point point = cam2screen(predictedPoint, screenWidthUm, screenHeightUm);
 
-        
 #ifdef USE_CALIBRATION
         /*
         * Use the mouse cursor as gaze target to calibrate
