@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props')" />
-  <Import Project="..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props" Condition="Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props')" />
   <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props')" />
+  <Import Project="..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props" Condition="Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props')" />
+  <Import Project="..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props" Condition="Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props')" />
   <Import Project="..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props" Condition="Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Custom|Win32">
@@ -461,7 +461,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/D"USE_EYECONTROL" /D "USE_VERBOSE" /D "USE_OPENVINO" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/D"USE_EYECONTROL" /D "USE_VERBOSE" /D "USE_OPENVINO" /D "AUTO_CAM_DETECT" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -545,9 +545,10 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets" Condition="Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets')" />
-    <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" />
-    <Import Project="..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets" Condition="Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets')" />
     <Import Project="..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.targets" Condition="Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.targets')" />
+    <Import Project="..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets" Condition="Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets')" />
+    <Import Project="..\packages\OpenBLAS.0.2.14.1\build\native\openblas.targets" Condition="Exists('..\packages\OpenBLAS.0.2.14.1\build\native\openblas.targets')" />
+    <Import Project="..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets" Condition="Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -555,11 +556,12 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.props'))" />
     <Error Condition="!Exists('..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GazeHid-Native.1.0.0\build\native\GazeHid-Native.targets'))" />
-    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props'))" />
-    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets'))" />
-    <Error Condition="!Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props'))" />
-    <Error Condition="!Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets'))" />
     <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.props'))" />
     <Error Condition="!Exists('..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Dlib-Native.19.22.0.3\build\native\Dlib-Native.targets'))" />
+    <Error Condition="!Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.props'))" />
+    <Error Condition="!Exists('..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JS.OnnxRuntime.OpenVINO.1.8.2\build\native\JS.OnnxRuntime.OpenVINO.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenBLAS.0.2.14.1\build\native\openblas.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenBLAS.0.2.14.1\build\native\openblas.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.props'))" />
+    <Error Condition="!Exists('..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCV-Native.4.5.2.2\build\native\OpenCV-Native.targets'))" />
   </Target>
 </Project>
